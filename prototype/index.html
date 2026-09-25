@@ -1,0 +1,1500 @@
+<title>Pet Travel Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,500..700&family=Mukta:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#E9EBF1;
+  --paper:#F6F7FA;
+  --surface:#FFFFFF;
+  --sunk:#EEF0F5;
+  --line:#DCDFE8;
+  --ink:#181B2B;
+  --muted:#5A6075;
+  --accent:#2E41B5;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#E6E9FA;
+  --ok:#17744A; --ok-soft:#E2F3EA;
+  --warn:#8F5600; --warn-soft:#FBEFD9;
+  --bad:#B02A20; --bad-soft:#FBE5E2;
+  --info:#3C4B7A; --info-soft:#E8EBF4;
+  --shadow:0 1px 2px rgba(24,27,43,.06),0 4px 16px rgba(24,27,43,.06);
+  --display:"Anek Latin","Mukta",system-ui,sans-serif;
+  --body:"Mukta",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0C0E15; --paper:#13151E; --surface:#1B1E2A; --sunk:#232736; --line:#2F3447;
+    --ink:#E8EAF2; --muted:#A1A7BC; --accent:#8E9CFF; --accent-ink:#11142A; --accent-soft:#252B4F;
+    --ok:#5CCB94; --ok-soft:#173226; --warn:#F0B35A; --warn-soft:#3A2B12; --bad:#FF8A7E; --bad-soft:#3D1B18;
+    --info:#AEB9E6; --info-soft:#252B42; --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0C0E15; --paper:#13151E; --surface:#1B1E2A; --sunk:#232736; --line:#2F3447;
+  --ink:#E8EAF2; --muted:#A1A7BC; --accent:#8E9CFF; --accent-ink:#11142A; --accent-soft:#252B4F;
+  --ok:#5CCB94; --ok-soft:#173226; --warn:#F0B35A; --warn-soft:#3A2B12; --bad:#FF8A7E; --bad-soft:#3D1B18;
+  --info:#AEB9E6; --info-soft:#252B42; --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.app{max-width:440px;margin:0 auto;min-height:100%;background:var(--paper);display:flex;flex-direction:column;position:relative}
+@media (min-width:480px){.app{border-inline:1px solid var(--line)}}
+
+.proto{background:var(--ink);color:var(--paper);font-size:13px;padding:6px 16px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.proto b{font-weight:600}
+.proto select{min-height:0;width:auto;background:transparent;border:1px solid color-mix(in srgb,var(--paper) 40%,transparent);border-radius:6px;padding:2px 6px;font-size:13px;color:var(--paper);max-width:180px}
+.proto select option{color:#181B2B;background:#fff}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:10px 16px;min-height:56px}
+.bar h1{font-family:var(--display);font-size:19px;font-weight:650;margin:0;flex:1;text-wrap:balance;line-height:1.2}
+.iconbtn{border:0;background:transparent;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;cursor:pointer;margin-left:-8px}
+.iconbtn:hover{background:var(--sunk)}
+.iconbtn svg{width:22px;height:22px}
+
+main{flex:1;padding:16px 16px 96px;display:flex;flex-direction:column;gap:20px}
+.tabs{position:sticky;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs button{border:0;background:transparent;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12.5px;color:var(--muted);cursor:pointer;min-height:56px}
+.tabs button svg{width:22px;height:22px}
+.tabs button[aria-current="true"]{color:var(--accent);font-weight:600}
+
+h2{font-family:var(--display);font-size:22px;font-weight:650;margin:0;line-height:1.2;text-wrap:balance}
+h3{font-family:var(--display);font-size:17px;font-weight:650;margin:0;line-height:1.25;text-wrap:balance}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.xs{font-size:13px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:12px}
+.stack-s{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.card.flat{background:var(--sunk);border-color:transparent}
+.section{display:flex;flex-direction:column;gap:12px;scroll-margin-top:110px}
+.section > header{display:flex;flex-direction:column;gap:2px}
+
+.btn{border:1px solid transparent;border-radius:12px;padding:11px 16px;min-height:46px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center;text-decoration:none;line-height:1.2}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.secondary{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn.secondary:hover{border-color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--accent);padding-inline:8px;min-height:40px}
+.btn.danger{background:var(--bad-soft);color:var(--bad)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:14px;border-radius:10px}
+
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.info{background:var(--info-soft);color:var(--info)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:12px;color:var(--muted);font-weight:500}
+.vf{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;background:var(--warn-soft);color:var(--warn);border-radius:4px;padding:0 5px;letter-spacing:.02em}
+
+.src{all:unset;cursor:pointer;display:inline-flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:12.5px;color:var(--muted);line-height:1.4}
+.src:hover .src-t{text-decoration:underline}
+.src:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.conf{font-weight:600;font-size:12px;border-radius:4px;padding:0 5px}
+.c-official{background:var(--ok-soft);color:var(--ok)}
+.c-secondary{background:var(--info-soft);color:var(--info)}
+.c-traveller{background:var(--accent-soft);color:var(--accent)}
+.c-conflicting{background:var(--warn-soft);color:var(--warn)}
+.c-unverified{background:var(--bad-soft);color:var(--bad)}
+
+.reasons{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.reasons li{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start}
+.reasons li .dot{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;margin-top:2px}
+.reasons li.b .dot{background:var(--bad-soft);color:var(--bad)}
+.reasons li.c .dot{background:var(--warn-soft);color:var(--warn)}
+.reasons li.n .dot{background:var(--info-soft);color:var(--info)}
+.reasons li.y .dot{background:var(--ok-soft);color:var(--ok)}
+.reasons li > div{display:flex;flex-direction:column;gap:2px}
+
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.lbl{font-size:14px;font-weight:600}
+.field .hint{font-size:13px;color:var(--muted)}
+input[type=text],input[type=date],input[type=time],input[type=number],input[type=tel],input[type=email],input[type=search],select,textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;min-height:46px}
+textarea{min-height:120px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.check{display:flex;gap:10px;align-items:flex-start;cursor:pointer;padding:6px 0}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
+
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--sunk);border-radius:12px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:8px 6px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;min-height:40px;line-height:1.2}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:20px;cursor:pointer}
+.stepper output{font-family:var(--mono);font-size:18px;min-width:24px;text-align:center}
+
+.list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.list > *{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;text-align:left;background:transparent;border-left:0;border-right:0;border-bottom:0;width:100%;cursor:pointer;color:inherit;text-decoration:none}
+.list > *:first-child{border-top:0}
+.list > button:hover{background:var(--sunk)}
+.list .grow{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.chev{color:var(--muted);flex:none}
+
+/* ticket */
+.ticket{background:var(--surface);border:1px solid var(--line);border-radius:14px;position:relative;overflow:hidden}
+.ticket .t-top{padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.ticket .t-route{display:flex;align-items:baseline;gap:10px;font-family:var(--display);font-size:22px;font-weight:650;flex-wrap:wrap}
+.ticket .t-route .arr{color:var(--muted);font-weight:500}
+.ticket .t-bottom{border-top:1px dashed var(--line);padding:10px 16px;display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.ticket .t-bottom div{display:flex;flex-direction:column}
+.ticket .t-bottom span:first-child{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ticket::before,.ticket::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:var(--paper);border:1px solid var(--line);top:calc(100% - 52px)}
+.ticket::before{left:-8px}.ticket::after{right:-8px}
+
+/* options */
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.opt.np{background:transparent}
+.opt .opt-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.opt .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:13.5px}
+.opt .meta div{display:flex;flex-direction:column}
+.opt .meta span:first-child{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+details > summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;list-style:none}
+details > summary::-webkit-details-marker{display:none}
+details[open] > summary{margin-bottom:10px}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.tl li:first-child{border-top:0}
+.tl .when{font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.35}
+.tl .what{display:flex;flex-direction:column;gap:6px}
+.tl .state{display:flex;gap:4px;flex-wrap:wrap}
+.tl .state button{border:1px solid var(--line);background:var(--surface);border-radius:8px;font-size:12.5px;padding:3px 8px;cursor:pointer;min-height:30px}
+.tl .state button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tl .state button.f[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#fff}
+.tl li.done .t-title{text-decoration:line-through;color:var(--muted)}
+
+.jump{position:sticky;top:calc(env(safe-area-inset-top,0px) + 56px);z-index:4;background:var(--paper);margin:-16px -16px 0;padding:8px 16px;border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.jump a{flex:none;font-size:13.5px;font-weight:600;text-decoration:none;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--surface)}
+.jump a:hover{color:var(--accent);border-color:var(--accent)}
+
+.callout{border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.callout.warn{background:var(--warn-soft)}
+.callout.bad{background:var(--bad-soft)}
+.callout.info{background:var(--info-soft)}
+.callout.ok{background:var(--ok-soft)}
+.callout b{font-weight:700}
+
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px}
+.kv dt{color:var(--muted);font-size:14px}
+.kv dd{margin:0}
+
+.big-time{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.1;font-stretch:90%}
+
+.doc{background:#FFFFFF;color:#1A1A1A;border:1px solid var(--line);border-radius:6px;padding:22px 20px;font-family:Georgia,"Times New Roman",serif;font-size:14.5px;line-height:1.55;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.doc .ph{background:#FFE9B8;border-radius:3px;padding:0 3px;font-family:var(--mono);font-size:12.5px;color:#6B4200}
+.doc .filled{background:#E7ECFF;border-radius:3px;padding:0 2px}
+.doc h4{margin:0;font-size:15px}
+.doc .wm{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.doc .wm span{transform:rotate(-28deg);font-family:var(--body);font-weight:700;font-size:17px;color:rgba(176,42,32,.22);text-align:center;max-width:90%;line-height:1.3}
+.doc .line{border-bottom:1px solid #999;display:inline-block;min-width:90px}
+
+.sheet-wrap{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;background:rgba(10,12,20,.45)}
+.sheet{background:var(--paper);width:100%;max-width:440px;max-height:88%;overflow:auto;border-radius:18px 18px 0 0;padding:8px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 0}
+.sheet .sh-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+blockquote{margin:0;border-left:3px solid var(--line);padding:4px 0 4px 12px;color:var(--ink);font-style:italic;font-size:15px}
+
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14.5px;max-width:min(400px,calc(100% - 32px));box-shadow:var(--shadow)}
+
+.fit{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:6px 10px;font-size:14px;align-items:center}
+.fit .h{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.otp{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.otp input{text-align:center;font-family:var(--mono);font-size:20px;padding:8px 0}
+.hero{display:flex;flex-direction:column;gap:10px;padding-top:4px}
+.hero h2{font-size:28px;font-stretch:92%;letter-spacing:-.01em}
+.scn{display:grid;grid-template-columns:1fr;gap:8px}
+.foot{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;display:flex;gap:10px;align-items:center;cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--accent)}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;background:var(--accent-soft);color:var(--accent);flex:none}
+.avatar.cat{background:var(--warn-soft);color:var(--warn)}
+.pets-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.pets-row .chip{flex:none}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+</style>
+
+<div class="app" id="app">
+  <div class="proto">
+    <span><b>Prototype.</b> Sample data. Rules as of 25 Sep 2026.</span>
+    <label class="row" style="gap:6px"><span class="xs">Jump to</span>
+      <select id="jump" aria-label="Jump to screen">
+        <option value="">Screen…</option>
+        <option value="home">Home</option>
+        <option value="wizard">Plan a trip</option>
+        <option value="s-dog12">Options: 12 kg dog</option>
+        <option value="s-cat4">Options: 4 kg cat</option>
+        <option value="p-rail">Rail plan</option>
+        <option value="p-dogbox">Dog box plan</option>
+        <option value="p-air">Flight plan (Akasa cabin)</option>
+        <option value="p-uk">Move to the UK</option>
+        <option value="p-usa">Move to the USA</option>
+        <option value="p-import">Coming to India</option>
+        <option value="wrong">Something went wrong</option>
+        <option value="letter">Coupe letter (C1)</option>
+        <option value="rulesheet">Rule sheet (C2)</option>
+        <option value="vet">Vet format (C3)</option>
+        <option value="rules">Rules library</option>
+        <option value="myths">Common myths</option>
+        <option value="pets">Pets and documents</option>
+        <option value="report">Trip report</option>
+      </select>
+    </label>
+  </div>
+  <div class="bar" id="bar"></div>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs" aria-label="Main"></nav>
+</div>
+<div class="sheet-wrap" id="sheetWrap" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============================================================
+   Dates
+   ============================================================ */
+const TODAY = (() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; })();
+const D = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d, 12); };
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const addMonths = (d, n) => { const x = new Date(d); x.setMonth(x.getMonth() + n); return x; };
+const fmt = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtS = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+const fmtDay = d => d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+const fmtT = d => d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+const ageMonths = (dob, at) => { let m = (at.getFullYear() - dob.getFullYear()) * 12 + (at.getMonth() - dob.getMonth()); if (at.getDate() < dob.getDate()) m--; return m; };
+const ageWeeks = (dob, at) => Math.floor((at - dob) / (7 * 864e5));
+const daysBetween = (a, b) => Math.round((b - a) / 864e5);
+const maxDate = (...ds) => new Date(Math.max(...ds.map(Number)));
+const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
+const ageText = (dob, at = TODAY) => { const m = ageMonths(dob, at); return m < 24 ? `${m} months` : `${Math.floor(m / 12)} years`; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const inr = n => '₹' + Number(n).toLocaleString('en-IN');
+
+/* ============================================================
+   Sources and rules (seed data, from PRD Appendix A)
+   ============================================================ */
+const SOURCES = {
+  irctc: { t: 'IRCTC: Online booking of Dogs/Cats, terms', pub: 'IRCTC', url: 'https://contents.irctc.co.in/en/PetBookingInTrains.pdf', type: 'official' },
+  sr426: { t: 'Southern Railway press release 426/2022-23 (2 Nov 2022)', pub: 'Southern Railway', url: 'https://sr.indianrailways.gov.in/view_detail.jsp?lang=0&id=0,4,268&dcd=12678&did=16673909645879C87C2781BF933529C087FF60815E236', type: 'official', date: '2022-11-02' },
+  nwr: { t: 'NWR training notes: parcel rules (Coaching Tariff)', pub: 'North Western Railway', url: 'https://nwr.indianrailways.gov.in/uploads/files/1675832656225-English%20parcel%20rules.pdf', type: 'official' },
+  crct: { t: 'Central Railway: Coaching Theory (training text)', pub: 'Central Railway', url: 'https://cr.indianrailways.gov.in/cris//uploads/files/1553600779866-Coaching%20Theory%20English.pdf', type: 'official' },
+  crchart: { t: 'Central Railway release: first chart 8 hours before (from 10 Jul 2025)', pub: 'Central Railway', url: 'https://cr.indianrailways.gov.in/view_detail.jsp?lang=0&id=0,4,268&dcd=9856&did=1751953668715F08FEB7D1A698517544F5A29DD31BC5D', type: 'official', date: '2025-07-08' },
+  bschart: { t: 'Business Standard, 18 Dec 2025: new chart timings', pub: 'Business Standard', url: 'https://www.business-standard.com/india-news/indian-railways-rules-2025-new-chart-updates-for-waiting-list-and-racs-nc-125121800905_1.html', type: 'secondary', date: '2025-12-18' },
+  rrail: { t: 'Traveller reports, r/indianrailways (2024–2026)', pub: 'Reddit', url: 'https://www.reddit.com/r/indianrailways/comments/1tyble4/', type: 'traveller' },
+  rdelhi: { t: 'Traveller report: coupe letter drop point in Delhi', pub: 'Reddit', url: 'https://www.reddit.com/r/IndianPets/comments/1u98jhi/', type: 'traveller' },
+  ai: { t: 'Air India: Travelling with pets', pub: 'Air India', url: 'https://www.airindia.com/in/en/travel-information/travelling-with-pets.html', type: 'official' },
+  aipdf: { t: 'Air India: pets in cabin guidelines (PDF, v9)', pub: 'Air India', url: 'https://www.airindia.com/content/dam/air-india/pdfs/ai-pets-in-cabin-guidelines.pdf', type: 'official' },
+  akasa: { t: 'Akasa Air: Pets on Akasa', pub: 'Akasa Air', url: 'https://www.akasaair.com/information/pets-on-akasa', type: 'official' },
+  fly91: { t: 'Fly91: Conditions of carriage', pub: 'Fly91', url: 'https://fly91.in/conditions-of-carriage', type: 'official' },
+  fly91t: { t: 'Fly91: tariff sheet (3 Sep 2026)', pub: 'Fly91', url: 'https://fly91.in/resources/tariff-sheet.pdf', type: 'official', date: '2026-09-03' },
+  alliance: { t: 'Alliance Air FAQ (25 Aug 2025)', pub: 'Alliance Air', url: 'https://plone.allianceair.in/allianceair/en/assets/faqs/faqs-25-8-2025.pdf', type: 'official', date: '2025-08-25' },
+  spicejet: { t: 'SpiceJet: general air travel FAQ', pub: 'SpiceJet', url: 'https://corporate.spicejet.com/generalairtravelfaq.aspx', type: 'official' },
+  indigo: { t: 'IndiGo: Conditions of carriage', pub: 'IndiGo', url: 'https://www.goindigo.in/information/conditions-of-carriage.html', type: 'official' },
+  aix: { t: 'Air India Express: in-flight FAQ', pub: 'Air India Express', url: 'https://www.airindiaexpress.com/support/faqs/in-flight', type: 'official' },
+  starair: { t: 'Star Air: terms and conditions', pub: 'Star Air', url: 'https://www.starair.in/Content/downloads/TermsAndConditions.pdf', type: 'official' },
+  aqcsImp: { t: 'AQCS: Import of pets under baggage', pub: 'AQCS', url: 'https://aqcsindia.gov.in/Home/ImportPetUnderBaggage', type: 'official' },
+  aqcsSop: { t: 'AQCS: SOP for import of pet dogs and cats (ATITHI 2.0)', pub: 'AQCS', url: 'https://aqcsindia.gov.in/pdfs/india-cats-guidance.pdf', type: 'official' },
+  aqcsExp: { t: 'AQCS: Export of pets (dogs and cats)', pub: 'AQCS', url: 'https://aqcsindia.gov.in/Home/ExportPets', type: 'official' },
+  cdc: { t: 'CDC: dogs from high-risk countries, foreign-vaccinated', pub: 'CDC', url: 'https://www.cdc.gov/importation/dogs/foreign-vaccinated-high-risk-countries.html', type: 'official' },
+  cdclabs: { t: 'CDC: approved rabies serology labs', pub: 'CDC', url: 'https://www.cdc.gov/importation/dogs/approved-labs.html', type: 'official' },
+  gbuk: { t: 'GOV.UK: Bringing your pet dog, cat or ferret to Great Britain', pub: 'GOV.UK', url: 'https://www.gov.uk/bring-pet-to-great-britain/print', type: 'official' },
+  eu: { t: 'Your Europe: EU rules on travelling with pets', pub: 'European Union', url: 'https://europa.eu/youreurope/citizens/travel/carry/pets-and-other-animals/index_en.htm', type: 'official' },
+  uae: { t: 'PetTravel.com: UAE pet import requirements', pub: 'PetTravel.com', url: 'https://www.pettravel.com/information/pet-passports/united-arab-emirates-pet-import-requirements/', type: 'secondary' },
+  cfia: { t: 'CFIA: bringing a dog to Canada', pub: 'CFIA', url: 'https://inspection.canada.ca/en/importing-food-plants-animals/pets/ask-questions-you-get-dog', type: 'official' },
+  daff: { t: 'Australia DAFF: step-by-step guides (search snippet)', pub: 'DAFF Australia', url: 'https://www.agriculture.gov.au/biosecurity-trade/cats-dogs/how-to-import/step-by-step-guides', type: 'secondary' },
+  mpi: { t: 'NZ MPI: Bringing cats and dogs to New Zealand', pub: 'MPI New Zealand', url: 'https://www.mpi.govt.nz/bring-send-to-nz/pets-travelling-to-nz/bringing-cats-and-dogs-to-nz', type: 'official' },
+  cmp: { t: 'Carry My Pet: published price ranges', pub: 'Carry My Pet', url: 'https://www.carrymypet.com/', type: 'secondary' },
+};
+
+const OPS = {
+  'indian-railways': 'Indian Railways', 'air-india': 'Air India', akasa: 'Akasa Air', fly91: 'Fly91', alliance: 'Alliance Air',
+  spicejet: 'SpiceJet', indigo: 'IndiGo', 'air-india-express': 'Air India Express', 'star-air': 'Star Air', all: 'All airlines',
+  aqcs: 'AQCS (India)', usa: 'USA', uk: 'United Kingdom', eu: 'European Union', uae: 'UAE', canada: 'Canada', australia: 'Australia', nz: 'New Zealand', titre: 'Titre labs',
+};
+
+const CHECKED = '2026-09-25';
+// r(id, op, statement, sources, conf, extra)
+const RULES = {};
+function r(id, op, s, src, conf, x = {}) { RULES[id] = { id, op, s, src, conf, checked: CHECKED, every: 90, ...x }; }
+
+// ---- Indian Railways
+r('rail.ir.dog.allowed_classes', 'indian-railways', 'Dogs and adult cats can travel with you only in First AC (1A) or First Class (FC), and only when a whole 2-berth coupe or 4-berth cabin is allotted to your PNR.', ['irctc', 'sr426'], 'official', { q: 'Dogs/Cats accompanied by owners can be carried in First AC/First class only when entire 4 berth cabin or 2 berth coupe is allotted to a single PNR.', v: { classes: ['1A', 'FC'] } });
+r('rail.ir.dog.disallowed_classes', 'indian-railways', 'Dogs cannot travel with you in 2A, 3A, 3E, chair car, sleeper or second class.', ['sr426'], 'official', { q: 'Dogs are not allowed to be carried in AC2 tier, AC 3 tier, AC Chair Car, Sleeper Class and Second Class Compartments.' });
+r('rail.ir.coupe.request_office', 'indian-railways', 'You can ask for a coupe or cabin at the DRM office or GM office. Requests get "due consideration". A request is not required, and it does not guarantee a coupe.', ['irctc'], 'official', { q: 'The request for allotment of cabin/coupe against a PNR booked in First AC/First class can be made in the divisional railway manager office or General Manager office. Due consideration is given to such requests while allotting the cabin or coupe.' });
+r('rail.ir.pet_ticket.online_window', 'indian-railways', 'Online pet booking opens after the first chart and closes when the final chart is prepared.', ['irctc'], 'official', { q: 'Ticket booking of Dogs/Cats is allowed only after preparation of first chart and upto final chart is prepared.' });
+r('rail.ir.pet_ticket.online_url', 'indian-railways', 'Book the pet ticket online on the IRCTC Dogs/Cats booking page: parcel.indianrail.gov.in/LTBook. It works for e-tickets and counter tickets.', ['irctc'], 'official', { q: 'Online ticket booking of Dogs/Cats can be done through IRCTC e-ticketing website for both e-tickets as well as counter tickets.' });
+r('rail.ir.pet_ticket.tte_device', 'indian-railways', 'A pet booked online appears against your name on the TTE\'s handheld device in the final chart.', ['irctc'], 'official', { q: 'Final chart also shows the entry of booked pets against the passenger in the hand held device of the TTE.' });
+r('rail.ir.pet_ticket.offline_min_hours_before', 'indian-railways', 'At the parcel office, book the pet at least 3 hours before departure, after your coupe or cabin is confirmed.', ['sr426'], 'official', { v: { hours: 3 } });
+r('rail.ir.pet_ticket.refund', 'indian-railways', 'The pet fare is not refunded, even if you cancel the PNR or the train is cancelled or late.', ['irctc'], 'official', { q: 'No refund of the freight charges is admissible for luggage ticket booked for the Dogs/Cats upon PNR cancellation, and even in case of the train cancellation/ late running of the train.' });
+r('rail.ir.docs.fitness_cert_hours_before', 'indian-railways', 'Get a vet fitness certificate 24 to 48 hours before the journey. It must say the pet has no infectious or contagious disease.', ['sr426'], 'official', { v: { minHours: 24, maxHours: 48 } });
+r('rail.ir.docs.required', 'indian-railways', 'Carry the vet fitness certificate, the vaccination card, your confirmed ticket and photo ID.', ['sr426'], 'official');
+r('rail.ir.fare.notional_weight_kg', 'indian-railways', 'The pet fare is the luggage rate (Scale L) for a fixed weight: 60 kg for a dog with you, 30 kg in the dog box, 20 kg for a small animal in a basket.', ['nwr', 'crct'], 'secondary', { verify: 'Scale L tariff table not retrieved yet.', v: { withPassenger: 60, dogBox: 30, basket: 20, seeingEyeDog: 30 } });
+r('rail.ir.fare.minimum_inr', 'indian-railways', 'The minimum pet fare is ₹30, plus 2% development charge and 5% GST.', ['crct'], 'secondary', { verify: 'Confirm against the current Coaching Tariff.' });
+r('rail.ir.fare.reported_range_inr', 'indian-railways', 'Travellers report paying about ₹160 to ₹800 per pet, depending on distance.', ['rrail'], 'traveller', { v: { min: 160, max: 800 } });
+r('rail.ir.dogs_per_pnr', 'indian-railways', 'Southern Railway says one dog per PNR. The IRCTC booking screen lets you choose more than one. Plan for one pet per PNR.', ['sr426', 'irctc'], 'conflicting', { q: 'Only one dog will be allowed per Passenger Name Record (PNR).' });
+r('rail.ir.penalty.unbooked_dog', 'indian-railways', 'An unbooked dog is charged six times the luggage rate. Sources give the minimum as ₹30 or ₹50. Any fine should come with an official railway receipt.', ['sr426', 'nwr'], 'conflicting', { verify: 'Confirm the receipt type (for example, Excess Fare Ticket).' });
+r('rail.ir.basket.kitten_puppy_any_class', 'indian-railways', 'Kittens and puppies that fit in a basket can travel in any class, with the usual luggage charge and the Station Master\'s permission.', ['irctc', 'crct'], 'official', { q: 'Puppies/kittens which can be carried in a basket can be carried by owners in any class after payment of usual booking charges.', verify: 'Age or size that counts as "fits in a basket" is not defined. Prototype uses under 6 months.', v: { maxAgeMonths: 6 } });
+r('rail.ir.copassenger_objection', 'indian-railways', 'If co-passengers object, the dog can be moved to the guard\'s van. No refund is given.', ['sr426'], 'official', { q: 'If fellow passengers subsequently object to the dog remaining in the compartment, it will be removed to the Guard\'s van, no refund is given.' });
+r('rail.ir.dogbox.availability', 'indian-railways', 'Dog boxes are in the brake vans of older ICF coaches. Newer LHB trains may not have one. You can hold a ticket in any class.', ['sr426', 'crct'], 'conflicting');
+r('rail.ir.dogbox.restraint', 'indian-railways', 'A dog in the dog box needs a collar and chain. Sources disagree on whether a muzzle is also required.', ['sr426', 'nwr'], 'conflicting');
+r('rail.ir.dogbox.capacity', 'indian-railways', 'Only one dog fits in a dog box at a time.', ['sr426'], 'official', { q: 'Only one dog will be allowed in a dog-box at a time', verify: 'Most trains are said to carry one box. Not confirmed.' });
+r('rail.ir.chart.first_chart', 'indian-railways', 'The first chart is usually ready at least 10 hours before departure from the charting station. For trains leaving between 5 am and 2 pm, it is ready by 8 pm the evening before. This is an estimate; check your PNR status.', ['bschart', 'crchart'], 'secondary', { verify: 'Confirm against the Railway Board circular for the December 2025 change.', v: { firstChartHoursBefore: 10, morningWindow: ['05:00', '14:00'], morningChartTime: '20:00', morningChartDay: 'previous' } });
+r('rail.ir.booking.arp_days', 'indian-railways', 'Tickets open for booking a fixed number of days before the journey (the Advance Reservation Period). The prototype uses 60 days as a placeholder.', [], 'unverified', { verify: 'No source yet. Needs a sourced value before launch.', v: { days: 60 } });
+
+// ---- Air India
+r('air.air-india.accepts', 'air-india', 'Air India carries dogs and cats.', ['ai'], 'official', { q: 'We allow only domesticated cats and dogs on board.' });
+r('air.air-india.cabin.max_weight_kg', 'air-india', 'In the cabin, your pet and its carrier together can weigh up to 10 kg.', ['ai'], 'official', { q: 'Up to 10 kg – In the cabin with you (Economy)', v: { kg: 10 } });
+r('air.air-india.cabin.carrier_in', 'air-india', 'The cabin carrier must be soft, no bigger than 17 × 10 × 9 inches, and without wheels.', ['ai'], 'official', { q: 'A soft kennel of 17x10x9 inches [LxWxH] is allowed. It must be leak-proof, secured, ventilated on 3 sides, and without wheels.', v: { l: 17, w: 10, h: 9, soft: true } });
+r('air.air-india.cabin.class', 'air-india', 'Cabin pets travel in Economy only, in aisle seats in the last 5 rows.', ['aipdf'], 'official', { note: 'The web page says "last row aisle seats, at least five rows between two pets". Open for review.' });
+r('air.air-india.cabin.pets_per_flight', 'air-india', 'At most 2 pets travel in the cabin on each flight, including service animals. Slots go first come, first served.', ['ai', 'aipdf'], 'official', { v: { cabin: 2 } });
+r('air.air-india.pets_per_passenger', 'air-india', 'Each passenger can take one pet.', ['ai'], 'official', { v: { n: 1 } });
+r('air.air-india.hold.weight_kg', 'air-india', 'Pets of 10 to 32 kg travel as checked baggage in the hold, depending on the aircraft. Over 32 kg must go as cargo.', ['ai'], 'official', { q: '10- 32 kg – Must be booked separately as checked baggage/cargo; Over 32 kg – Must be booked as cargo', v: { min: 10, max: 32 } });
+r('air.air-india.fee_inr', 'air-india', 'The fee is ₹7,500 in the cabin and ₹16,000 in the hold, per sector, plus taxes.', ['ai'], 'official', { every: 30, v: { cabin: 7500, hold: 16000 } });
+r('air.air-india.min_age', 'air-india', 'Pets must be at least 8 weeks old for the cabin and 3 months old for the hold.', ['ai', 'aipdf'], 'official', { v: { cabinWeeks: 8, holdMonths: 3 } });
+r('air.air-india.booking', 'air-india', 'Book the pet through the Air India support portal or at a counter, at least 48 hours before the flight.', ['ai'], 'official', { v: { hours: 48 } });
+r('air.air-india.report_hours_before', 'air-india', 'Report at the airport 3 hours before departure.', ['ai'], 'official', { v: { hours: 3 } });
+r('air.air-india.health_cert_days', 'air-india', 'The vet health certificate must be issued within 7 days before departure.', ['ai'], 'official', { q: 'Certificate must be issued within 7 days before departure or as per the rules of the destination state/country.', v: { days: 7 } });
+r('air.air-india.indemnity_copies', 'air-india', 'Carry the signed indemnity form: 2 copies for a direct flight, 4 for a connection.', ['ai'], 'official');
+r('air.air-india.brachy_hold', 'air-india', 'Snub-nosed (flat-faced) breeds are not allowed in the hold. They can travel in the cabin with vet advice.', ['ai'], 'official', { q: 'Snub-nosed or flat-faced breeds (brachycephalic) are not permitted in the cargo compartment' });
+r('air.air-india.blocked_with', 'air-india', 'You cannot take a pet in the cabin if you travel with an infant or need wheelchair assistance. Unaccompanied minors cannot travel with pets.', ['ai'], 'official');
+r('air.air-india.connections', 'air-india', 'Pets can connect only between Air India flights.', ['ai'], 'official');
+r('air.air-india.intl_route_bans', 'air-india', 'Air India carries no pets to or from the USA, Canada or Australia. The UK is cargo only. No cabin pets from India to the UAE.', ['ai'], 'official');
+
+// ---- Akasa
+r('air.akasa.cabin.max_weight_kg', 'akasa', 'In the cabin, your pet and its container together can weigh up to 10 kg.', ['akasa'], 'official', { v: { kg: 10 } });
+r('air.akasa.cabin.container_in', 'akasa', 'The cabin container can be up to 19 × 12.6 × 10 inches.', ['akasa'], 'official', { v: { l: 19, w: 12.6, h: 10, soft: false } });
+r('air.akasa.pets_per_flight', 'akasa', 'Each flight takes up to 2 pets in the cabin and 1 in the hold, first come, first served.', ['akasa'], 'official', { v: { cabin: 2, hold: 1 } });
+r('air.akasa.pets_per_passenger', 'akasa', 'Each passenger can take 1 pet in the cabin and 1 in the hold.', ['akasa'], 'official', { verify: 'Some 2025 news reports say 2 per passenger.', v: { n: 1 } });
+r('air.akasa.hold.max_weight_kg', 'akasa', 'In the hold (checked in at the airport), pet plus container can weigh up to 32 kg. Through the cargo terminal, up to 100 kg.', ['akasa'], 'official', { v: { hold: 32, cargo: 100 } });
+r('air.akasa.hold.container_in', 'akasa', 'Hold and cargo containers can be up to 36 × 28 × 28 inches.', ['akasa'], 'official', { v: { l: 36, w: 28, h: 28 } });
+r('air.akasa.fee_inr', 'akasa', 'The fee is ₹7,500 in the cabin and ₹15,000 in the hold, including taxes.', ['akasa'], 'official', { every: 30, v: { cabin: 7500, hold: 15000 } });
+r('air.akasa.booking', 'akasa', 'Cabin pets are booked only through the Akasa Care Centre on +91 96061 12131. Hold pets of 10–32 kg are booked at the airport counter. Book at least 24 hours before the flight.', ['akasa'], 'official', { v: { hours: 24, phone: '+91 96061 12131' } });
+r('air.akasa.report_hours_before', 'akasa', 'Report at the airport 2 hours before departure.', ['akasa'], 'official', { v: { hours: 2 } });
+r('air.akasa.health_cert', 'akasa', 'Get the vet health certificate within 72 hours of travel to be safe. Akasa\'s FAQ says it is valid for 15 days.', ['akasa'], 'conflicting', { q: 'Properly validated vaccination and health certificate from a registered vet must be obtained within 72 hours of travel. Once procured this health certificate will be considered valid until 15 days from the date of its issuance.', verify: 'Ask Akasa which one applies.' });
+r('air.akasa.muzzle', 'akasa', 'Dogs must be muzzled during the flight.', ['akasa'], 'official');
+r('air.akasa.seat', 'akasa', 'You will be given a window seat.', ['akasa'], 'official');
+r('air.akasa.nonstop_only', 'akasa', 'Pets travel on non-stop flights only.', ['akasa'], 'official');
+r('air.akasa.min_age', 'akasa', 'Pets must be at least 3 months old, and not more than 4 weeks pregnant.', ['akasa'], 'official', { v: { months: 3 } });
+r('air.akasa.brachy_hold', 'akasa', 'Snub-nosed (flat-faced) dogs are not allowed in the hold.', ['akasa'], 'official');
+r('air.akasa.blocked_with', 'akasa', 'If you travel with an infant, the pet cannot be in the cabin, but the hold is allowed. Akasa does not recommend pets for passengers who need wheelchair assistance.', ['akasa'], 'official');
+r('air.akasa.esa', 'akasa', 'Emotional support animals are not accepted.', ['akasa'], 'official');
+
+// ---- Fly91, Alliance, others
+r('air.fly91.cabin.max_weight_kg', 'fly91', 'Pet plus container can weigh up to 7 kg. Cabin only.', ['fly91'], 'official', { v: { kg: 7 } });
+r('air.fly91.cabin.container_in', 'fly91', 'The container can be up to 17 × 10 × 8 inches.', ['fly91'], 'official', { v: { l: 17, w: 10, h: 8, soft: false } });
+r('air.fly91.pets_per_flight', 'fly91', 'Only 1 pet per flight, including service dogs.', ['fly91'], 'official', { v: { cabin: 1 } });
+r('air.fly91.fee_inr', 'fly91', 'The fee is ₹5,000 per sector.', ['fly91t'], 'official', { every: 30, v: { cabin: 5000 } });
+r('air.fly91.booking', 'fly91', 'Book through a Fly91 support ticket at least 24 hours before the flight. Pets cannot be booked on the website.', ['fly91'], 'official', { v: { hours: 24 } });
+r('air.fly91.muzzle', 'fly91', 'Dogs must be muzzled.', ['fly91'], 'official');
+r('air.fly91.blocked_with', 'fly91', 'No pet in the cabin if you travel with an infant or need wheelchair assistance.', ['fly91'], 'official');
+r('air.fly91.min_age', 'fly91', 'Pets must be at least 3 months old.', ['fly91'], 'official', { v: { months: 3 } });
+r('air.fly91.network', 'fly91', 'Fly91 serves Goa (Mopa), Agatti, Kochi, Bengaluru, Hubli, Hyderabad, Jalgaon, Pune, Sindhudurg, Tirupati, Rajahmundry, Vijayawada and Visakhapatnam.', ['fly91t'], 'official', { every: 30, v: { cities: ['Goa', 'Kochi', 'Bengaluru', 'Hyderabad', 'Pune'] } });
+r('air.alliance.cabin', 'alliance', 'Alliance Air takes dogs and cats in the cabin: pet up to 5 kg, up to 8 kg with the kennel, kennel up to 18 × 18 × 12 inches, 2 pets per flight, last row, with the captain\'s approval.', ['alliance'], 'official', { v: { kg: 8, petKg: 5, l: 18, w: 18, h: 12, cabin: 2 } });
+r('air.alliance.fee', 'alliance', 'The fee is twice the excess baggage rate for the sector.', ['alliance'], 'official', { every: 30 });
+r('air.alliance.hold', 'alliance', 'Pets are not carried in the hold.', ['alliance'], 'official');
+r('air.spicejet.cabin', 'spicejet', 'SpiceJet does not carry pets in the cabin.', ['spicejet'], 'official');
+r('air.spicejet.cargo', 'spicejet', 'SpiceJet says pets can go in the cargo hold on domestic flights, via cargocare@spicejet.com. Weights and fees are not published.', ['spicejet'], 'conflicting', { verify: 'Current availability, weights and fees.' });
+r('air.indigo.pets', 'indigo', 'IndiGo does not carry pets. Only trained service dogs are accepted.', ['indigo'], 'secondary');
+r('air.air-india-express.pets', 'air-india-express', 'Air India Express does not carry pets. Service animals only by exception.', ['aix'], 'official', { q: 'Our standard policy does not permit pets onboard.' });
+r('air.star-air.pets', 'star-air', 'Star Air does not carry pets.', ['starair'], 'official');
+r('air.all.sedation', 'all', 'Sedated pets are refused by Air India, Akasa and Fly91. Talk to your vet about travel stress. We never recommend a drug or dose.', ['ai', 'akasa', 'fly91'], 'official');
+
+// ---- International
+r('intl.aqcs.export.appointment_days_before', 'aqcs', 'Take your pet to an AQCS station, by appointment, about 7 days before departure.', ['aqcsExp'], 'official', { v: { days: 7 } });
+r('intl.aqcs.export.cert_valid_days', 'aqcs', 'The AQCS export certificate is valid for 10 days.', ['aqcsExp'], 'official', { v: { days: 10 } });
+r('intl.aqcs.export.fee_inr', 'aqcs', 'The AQCS export fee is ₹500, paid on Bharatkosh.', ['aqcsSop'], 'official');
+r('intl.aqcs.export.stations', 'aqcs', 'AQCS stations: Delhi, Mumbai, Chennai, Kolkata, Bengaluru and Hyderabad. The pet must fly from the airport named on the certificate.', ['aqcsExp', 'ai'], 'official');
+r('intl.aqcs.export.docs', 'aqcs', 'Bring the vet fitness certificate, microchip certificate, vaccination record, your passport and ticket, the airway bill (if cargo), two 4×6 inch photos, and the destination\'s requirements.', ['aqcsExp'], 'official');
+r('intl.aqcs.import.advance_noc', 'aqcs', 'Apply for the advance NOC on ATITHI 2.0 at least 7 days before departure. It is issued within 1 working day. Airlines must refuse the pet without it.', ['aqcsSop'], 'official', { v: { days: 7 } });
+r('intl.aqcs.import.fee_inr', 'aqcs', 'The AQCS import fee is ₹1,000, paid on Bharatkosh.', ['aqcsSop'], 'official');
+r('intl.aqcs.import.max_pets_baggage', 'aqcs', 'Up to 2 dogs or cats can come in as baggage under transfer of residence (2 years abroad).', ['aqcsImp'], 'official', { v: { n: 2 } });
+r('intl.aqcs.import.dgft_needed', 'aqcs', 'A DGFT import licence is needed when it is not a transfer of residence or a re-import. This covers visitors.', ['aqcsImp', 'aqcsSop'], 'official');
+r('intl.aqcs.import.rabies_window', 'aqcs', 'The rabies vaccine must be given more than 1 month and within 12 months before departure (dogs and cats 3 months or older).', ['aqcsImp'], 'official', { q: 'The dog (three months of age and older) and Cat must be vaccinated against Rabies more than one month, but within 12 months prior to actual embarkation…' });
+r('intl.aqcs.import.quarantine_if_unfit_days', 'aqcs', 'On arrival, AQCS inspects the pet. A pet found unfit goes into 15 days\' quarantine at the owner\'s cost.', ['aqcsSop'], 'official');
+r('intl.aqcs.import.unaccompanied', 'aqcs', 'An unaccompanied pet must arrive within 1 month of the owner. Otherwise advance customs permission is needed.', ['aqcsImp'], 'official');
+r('intl.titre.labs_in_india', 'titre', 'No lab in India is approved by the CDC or the EU for the rabies titre test. The nearest listed lab is CVRL in Dubai.', ['cdclabs', 'eu'], 'official');
+r('intl.usa.high_risk', 'usa', 'The CDC lists India as high-risk for dog rabies.', ['cdc'], 'official', { every: 30 });
+r('intl.usa.requirements', 'usa', 'Dogs from India need: microchip before the rabies vaccine; a CDC vaccination form endorsed by a government vet (within 30 days of travel); a titre from a CDC-approved lab (sample at least 30 days after the vaccine and 28 days before entry), or a 28-day quarantine; a reservation at a CDC-registered facility; minimum age 6 months; and the CDC Dog Import Form.', ['cdc'], 'official', { every: 30 });
+r('intl.uk.requirements', 'uk', 'India is an unlisted country. Titre sample at least 30 days after the vaccine, 0.5 IU/ml or more, then wait 3 months. Great Britain health certificate; enter within 10 days. Tapeworm treatment for dogs 1–5 days before. Cargo on approved routes only.', ['gbuk'], 'official', { every: 120 });
+r('intl.eu.requirements', 'eu', 'Titre at an EU-designated lab, then wait 3 months. EU health certificate issued within 10 days of arrival. Enter at a designated point. Up to 5 pets.', ['eu'], 'official', { every: 120 });
+r('intl.uae.requirements', 'uae', 'MOCCAE import permit before travel. Titre test for pets from high-risk countries. Minimum age 15 weeks.', ['uae'], 'secondary', { verify: 'Wait period after titre not confirmed.' });
+r('intl.canada.requirements', 'canada', 'Personal pets need a rabies vaccination certificate. Commercial and rescue dogs from high-risk countries are banned.', ['cfia'], 'secondary', { verify: 'Confirm that no titre is needed for personal pets.' });
+r('intl.australia.direct', 'australia', 'Pets cannot go directly from India to Australia. They must first live about 180 days in an approved country.', ['daff'], 'secondary');
+r('intl.nz.direct', 'nz', 'Pets cannot go directly from India to New Zealand. A new import standard becomes mandatory on 1 April 2027.', ['mpi'], 'secondary', { every: 30 });
+r('intl.agency.cost', 'aqcs', 'Relocation agencies publish ranges of about ₹2–5 lakh for international moves.', ['cmp'], 'secondary');
+
+const CONF = { official: 'Official rule', secondary: 'Secondary source', traveller: 'Traveller-reported', conflicting: 'Sources disagree', unverified: 'Unverified' };
+const R = id => RULES[id];
+const V = id => RULES[id]?.v || {};
+const dueOn = rule => addDays(D(rule.checked), rule.every);
+const overdue = rule => dueOn(rule) < TODAY;
+
+/* ============================================================
+   Reference data (sample)
+   ============================================================ */
+const BREEDS = {
+  dog: [['Indie (INDog)', false], ['Labrador Retriever', false], ['Golden Retriever', false], ['German Shepherd', false], ['Beagle', false], ['Pomeranian', false], ['Dachshund', false], ['Siberian Husky', false], ['Rottweiler', false], ['Shih Tzu', true], ['Pug', true], ['French Bulldog', true], ['English Bulldog', true], ['Boxer', true], ['Lhasa Apso', true], ['Pekingese', true], ['Boston Terrier', true], ['Mixed or other', null]],
+  cat: [['Indian domestic cat', false], ['Siamese', false], ['Maine Coon', false], ['Bengal', false], ['Persian', true], ['Himalayan', true], ['Exotic Shorthair', true], ['British Shorthair', true], ['Mixed or other', null]],
+};
+const CITIES = ['Delhi', 'Mumbai', 'Bengaluru', 'Kolkata', 'Chennai', 'Hyderabad', 'Pune', 'Goa', 'Kochi', 'Guwahati'];
+const AQCS_CITIES = ['Delhi', 'Mumbai', 'Chennai', 'Kolkata', 'Bengaluru', 'Hyderabad'];
+const COUNTRIES = [['uk', 'United Kingdom'], ['eu', 'An EU country'], ['usa', 'USA'], ['canada', 'Canada'], ['uae', 'UAE'], ['australia', 'Australia'], ['nz', 'New Zealand']];
+// stops: [code, station, city, time, dayOffset, haltMin]
+const TRAINS = [
+  { no: '12951', name: 'Mumbai Rajdhani', rake: 'LHB', has1A: true, coaches1A: 1, hours: 16, stops: [['MMCT', 'Mumbai Central', 'Mumbai', '17:00', 0, 0], ['BRC', 'Vadodara', 'Vadodara', '21:30', 0, 5], ['KOTA', 'Kota', 'Kota', '03:15', 1, 5], ['NDLS', 'New Delhi', 'Delhi', '08:35', 1, 0]] },
+  { no: '22691', name: 'Bengaluru Rajdhani', rake: 'LHB', has1A: true, coaches1A: 1, hours: 34, stops: [['SBC', 'KSR Bengaluru', 'Bengaluru', '20:00', 0, 0], ['SC', 'Secunderabad', 'Hyderabad', '06:30', 1, 10], ['NGP', 'Nagpur', 'Nagpur', '14:30', 1, 10], ['BPL', 'Bhopal', 'Bhopal', '21:05', 1, 10], ['NZM', 'Hazrat Nizamuddin', 'Delhi', '05:30', 2, 0]] },
+  { no: '22692', name: 'Bengaluru Rajdhani', rake: 'LHB', has1A: true, coaches1A: 1, hours: 34, stops: [['NZM', 'Hazrat Nizamuddin', 'Delhi', '19:50', 0, 0], ['BPL', 'Bhopal', 'Bhopal', '03:30', 1, 10], ['NGP', 'Nagpur', 'Nagpur', '10:15', 1, 10], ['SC', 'Secunderabad', 'Hyderabad', '18:20', 1, 10], ['SBC', 'KSR Bengaluru', 'Bengaluru', '05:20', 2, 0]] },
+  { no: '90004', name: 'Sample Mail (ICF rake)', rake: 'ICF', has1A: true, coaches1A: 1, hours: 38, stops: [['NDLS', 'New Delhi', 'Delhi', '09:15', 0, 0], ['AGC', 'Agra Cantt', 'Agra', '12:05', 0, 5], ['BPL', 'Bhopal', 'Bhopal', '18:40', 0, 15], ['NGP', 'Nagpur', 'Nagpur', '02:10', 1, 20], ['SC', 'Secunderabad', 'Hyderabad', '11:30', 1, 15], ['SBC', 'KSR Bengaluru', 'Bengaluru', '23:10', 1, 0]] },
+  { no: '90001', name: 'Sample Mail (ICF rake)', rake: 'ICF', has1A: true, coaches1A: 1, hours: 38, stops: [['SBC', 'KSR Bengaluru', 'Bengaluru', '19:20', 0, 0], ['SC', 'Secunderabad', 'Hyderabad', '07:05', 1, 15], ['NGP', 'Nagpur', 'Nagpur', '16:30', 1, 20], ['BPL', 'Bhopal', 'Bhopal', '00:50', 2, 15], ['NDLS', 'New Delhi', 'Delhi', '09:20', 2, 0]] },
+  { no: '12301', name: 'Howrah Rajdhani', rake: 'LHB', has1A: true, coaches1A: 1, hours: 17, stops: [['HWH', 'Howrah', 'Kolkata', '16:50', 0, 0], ['DHN', 'Dhanbad', 'Dhanbad', '20:30', 0, 5], ['PRYJ', 'Prayagraj', 'Prayagraj', '03:50', 1, 5], ['NDLS', 'New Delhi', 'Delhi', '10:00', 1, 0]] },
+  { no: '90002', name: 'Sample Intercity (no 1A)', rake: 'LHB', has1A: false, coaches1A: 0, hours: 6, stops: [['MAS', 'Chennai Central', 'Chennai', '07:40', 0, 0], ['JTJ', 'Jolarpettai', 'Jolarpettai', '10:05', 0, 5], ['SBC', 'KSR Bengaluru', 'Bengaluru', '13:30', 0, 0]] },
+];
+const OFFICES = {
+  Delhi: { office: 'Baroda House (Northern Railway HQ), New Delhi', drop: 'Drop box for your travel day. Travellers mention cabin 13 and two boxes by travel day.', methods: 'Drop box or hand delivery', hours: 'Not yet verified', lead: 5, conf: 'traveller', src: 'rdelhi' },
+  Bengaluru: { office: 'DRM office, Bengaluru division (near Majestic)', drop: 'Hand in at the commercial section.', methods: 'Hand delivery', hours: 'Not yet verified', lead: 4, conf: 'traveller', src: 'rrail' },
+  Hyderabad: { office: 'Rail Nilayam (South Central Railway HQ), Secunderabad', drop: 'Hand in at the reservation or commercial section.', methods: 'Hand delivery', hours: 'Not yet verified', lead: 4, conf: 'traveller', src: 'rrail' },
+};
+
+/* ============================================================
+   App state (sample data)
+   ============================================================ */
+const S = {
+  view: 'home', params: {}, stack: [],
+  signedIn: false, contact: '',
+  pets: [
+    { id: 'p1', name: 'Bruno', species: 'dog', breed: 'Indie (INDog)', flat: false, dob: iso(addMonths(TODAY, -50)), w: 12, wc: null, chip: '900215004812345', carrier: null, sex: 'male' },
+    { id: 'p2', name: 'Mishti', species: 'cat', breed: 'Indian domestic cat', flat: false, dob: iso(addMonths(TODAY, -30)), w: 4, wc: 5.2, chip: '', carrier: 'c1', sex: 'female' },
+    { id: 'p3', name: 'Oreo', species: 'dog', breed: 'Pug', flat: true, dob: iso(addMonths(TODAY, -74)), w: 8, wc: null, chip: '', carrier: null, sex: 'male' },
+  ],
+  carriers: [{ id: 'c1', name: 'Grey soft bag', type: 'soft', l: 18, w: 11, h: 9, kg: 1.2 }],
+  vacc: [
+    { id: 'v1', pet: 'p1', type: 'Rabies', given: iso(addDays(TODAY, -345)), until: iso(addDays(TODAY, 20)), vet: 'Dr. R. Iyer' },
+    { id: 'v2', pet: 'p1', type: 'DHPPi', given: iso(addDays(TODAY, -345)), until: iso(addDays(TODAY, 20)), vet: 'Dr. R. Iyer' },
+    { id: 'v3', pet: 'p2', type: 'Rabies', given: iso(addDays(TODAY, -60)), until: iso(addDays(TODAY, 305)), vet: 'Dr. S. Das' },
+    { id: 'v4', pet: 'p2', type: 'FVRCP', given: iso(addDays(TODAY, -60)), until: iso(addDays(TODAY, 305)), vet: 'Dr. S. Das' },
+  ],
+  docs: [{ id: 'd1', pet: 'p1', type: 'Vaccination card', file: 'bruno-vaccination-card.jpg', issued: iso(addDays(TODAY, -345)), expires: iso(addDays(TODAY, 20)) }],
+  trip: null, trips: [], wz: null,
+  priority: 'stress', tasks: {}, chartAns: null, fallbackTaken: null,
+  intl: { chip: true, chipDate: '', vacc: '', titre: '' },
+  imp: { tor: null, reimport: null, vacc: '' },
+  flight: { time: '10:00', carrier: 'c1', ref: '' },
+  rail: { train: null, board: null, depTime: null },
+  letter: { name: '', pnr: '', berths: '2', phone: '', email: '', coach: '' },
+  checklist: {}, report: {}, reportDone: false,
+};
+const pet = id => S.pets.find(p => p.id === id);
+const carrierOf = p => S.carriers.find(c => c.id === p.carrier);
+const breedFlat = p => { const b = (BREEDS[p.species] || []).find(x => x[0] === p.breed); return b && b[1] !== null ? b[1] : !!p.flat; };
+const petWeightWithCarrier = p => p.wc != null ? p.wc : (carrierOf(p) && carrierOf(p).kg != null ? +(p.w + carrierOf(p).kg).toFixed(1) : null);
+
+/* ============================================================
+   Rules engine
+   ============================================================ */
+const AIR_CABIN = [
+  { key: 'air.air-india.cabin', op: 'air-india', label: 'Air India, in the cabin', w: 'air.air-india.cabin.max_weight_kg', box: 'air.air-india.cabin.carrier_in', age: ['air.air-india.min_age', 'cabinWeeks'], block: 'air.air-india.blocked_with', infant: 'block', wheel: 'block', slot: 'air.air-india.cabin.pets_per_flight', pax: 'air.air-india.pets_per_passenger', fee: 'air.air-india.fee_inr', feeNote: 'per sector, plus taxes', lead: 'air.air-india.booking', stress: 1, extra: ['air.air-india.cabin.class'] },
+  { key: 'air.akasa.cabin', op: 'akasa', label: 'Akasa Air, in the cabin', w: 'air.akasa.cabin.max_weight_kg', box: 'air.akasa.cabin.container_in', age: ['air.akasa.min_age', 'months'], block: 'air.akasa.blocked_with', infant: 'block', wheel: 'warn', slot: 'air.akasa.pets_per_flight', pax: 'air.akasa.pets_per_passenger', fee: 'air.akasa.fee_inr', feeNote: 'including taxes', lead: 'air.akasa.booking', stress: 1, extra: ['air.akasa.nonstop_only', 'air.akasa.muzzle'] },
+  { key: 'air.fly91.cabin', op: 'fly91', label: 'Fly91, in the cabin', w: 'air.fly91.cabin.max_weight_kg', box: 'air.fly91.cabin.container_in', age: ['air.fly91.min_age', 'months'], block: 'air.fly91.blocked_with', infant: 'block', wheel: 'block', slot: 'air.fly91.pets_per_flight', pax: null, fee: 'air.fly91.fee_inr', feeNote: 'per sector', lead: 'air.fly91.booking', stress: 1, network: 'air.fly91.network', extra: ['air.fly91.muzzle'] },
+  { key: 'air.alliance.cabin', op: 'alliance', label: 'Alliance Air, in the cabin', w: 'air.alliance.cabin', box: 'air.alliance.cabin', age: null, block: null, slot: 'air.alliance.cabin', pax: null, fee: 'air.alliance.fee', feeNote: '2× excess baggage rate', lead: null, stress: 1, extra: [] },
+];
+
+function fitCheck(carrier, lim) {
+  const dims = [['Length', carrier.l, lim.l], ['Width', carrier.w, lim.w], ['Height', carrier.h, lim.h]];
+  const rows = dims.map(([n, have, max]) => { const m = +(max - have).toFixed(2); return { n, have, max, m, st: m < 0 ? 'fail' : m <= 0.5 ? 'border' : 'pass' }; });
+  let st = rows.some(x => x.st === 'fail') ? 'fail' : rows.some(x => x.st === 'border') ? 'border' : 'pass';
+  const softFail = lim.soft && carrier.type !== 'soft';
+  if (softFail) st = 'fail';
+  return { rows, st, softFail };
+}
+
+function evaluate(trip) {
+  const pets = trip.petIds.map(pet);
+  const out = [];
+  const at = D(trip.date);
+  const mk = o => Object.assign({ blockers: [], conds: [], notes: [], risk: [] }, o);
+  const add = o => out.push(mk(o));
+  if (trip.kind === 'domestic') {
+    // ---- cabin
+    for (const c of AIR_CABIN) {
+      const o = { key: c.key, group: 'air', op: c.op, label: c.label, mode: 'Flight · cabin', stress: c.stress, hours: 3, blockers: [], conds: [], notes: [], risk: [] };
+      const lim = V(c.w), box = V(c.box);
+      for (const p of pets) {
+        const wc = petWeightWithCarrier(p);
+        if (wc != null && wc > lim.kg) o.blockers.push({ r: c.w, t: `${p.name} weighs ${wc} kg with the carrier. The limit is ${lim.kg} kg.` });
+        else if (p.w > lim.kg) o.blockers.push({ r: c.w, t: `${p.name} weighs ${p.w} kg. The limit is ${lim.kg} kg including the carrier.` });
+        else if (wc == null) o.conds.push({ r: c.w, t: `Weigh ${p.name} in the carrier. Together they must be ${lim.kg} kg or less.` });
+        else o.conds.push({ r: c.w, t: `${p.name} weighs ${wc} kg with the carrier, within the ${lim.kg} kg limit. Airline scales decide on the day.` });
+        if (lim.petKg && p.w > lim.petKg) o.blockers.push({ r: c.w, t: `${p.name} weighs ${p.w} kg. Alliance Air takes pets up to ${lim.petKg} kg.` });
+        if (c.age) { const [rid, k] = c.age; const min = V(rid)[k]; const ok = k === 'cabinWeeks' ? ageWeeks(D(p.dob), at) >= min : ageMonths(D(p.dob), at) >= min; if (!ok) o.blockers.push({ r: rid, t: `${p.name} will be too young. Minimum age is ${min} ${k === 'cabinWeeks' ? 'weeks' : 'months'}.` }); }
+        const cr = carrierOf(p);
+        if (cr) { const f = fitCheck(cr, box); if (f.st === 'fail') o.conds.push({ r: c.box, t: `${p.name}'s saved carrier (${cr.l}×${cr.w}×${cr.h} in${f.softFail ? ', hard' : ''}) does not fit. You need a smaller${box.soft ? ', soft' : ''} carrier.` }); else if (f.st === 'border') o.conds.push({ r: c.box, t: `${p.name}'s saved carrier is within 0.5 inch of the limit. Staff may measure it.` }); }
+        else o.conds.push({ r: c.box, t: `Carrier must be ${box.soft ? 'soft and ' : ''}no bigger than ${box.l} × ${box.w} × ${box.h} inches.` });
+        if (breedFlat(p)) o.notes.push({ r: 'air.air-india.brachy_hold', t: `${p.name} is a flat-faced breed. The cabin is allowed; ask your vet first.` });
+      }
+      if (trip.infant && c.infant === 'block') o.blockers.push({ r: c.block, t: 'You are travelling with an infant. This airline does not allow a pet in the cabin then.' });
+      if (trip.wheelchair && c.wheel === 'block') o.blockers.push({ r: c.block, t: 'You need wheelchair assistance. This airline does not allow a pet in the cabin then.' });
+      if (trip.wheelchair && c.wheel === 'warn') o.conds.push({ r: c.block, t: 'Akasa does not recommend pets for passengers who need wheelchair assistance.' });
+      const perFlight = V(c.slot).cabin;
+      if (pets.length > perFlight) o.blockers.push({ r: c.slot, t: `You have ${pets.length} pets. This airline takes ${perFlight} in the cabin per flight.` });
+      if (c.pax && pets.length > trip.travellers) o.blockers.push({ r: c.pax, t: `One pet per passenger. You need at least ${pets.length} travellers.` });
+      if (c.network) { const net = V(c.network).cities; if (!net.includes(trip.from) || !net.includes(trip.to)) o.blockers.push({ r: c.network, t: `Fly91 does not serve ${!net.includes(trip.from) ? trip.from : trip.to}.` }); else o.conds.push({ r: c.network, t: 'Check that Fly91 flies your exact route on your date.' }); }
+      else o.conds.push({ r: c.slot, t: 'Check that the airline flies your route.' });
+      o.conds.unshift({ r: c.slot, t: `A cabin slot must be free on your flight (${perFlight} per flight, first come, first served).` });
+      if (c.op === 'alliance') o.conds.push({ r: c.slot, t: 'The captain must approve on the day.' });
+      (c.extra || []).forEach(id => o.notes.push({ r: id, t: R(id).s }));
+      const f = V(c.fee);
+      o.cost = f.cabin ? { min: f.cabin * pets.length, max: f.cabin * pets.length, basis: c.feeNote } : { text: c.feeNote };
+      o.lead = c.lead ? `${V(c.lead).hours} h before the flight` : 'Not stated';
+      o.stressNote = 'Pet stays with you. Short and familiar.';
+      add(o);
+    }
+    // ---- hold / cargo
+    {
+      const o = mk({ key: 'air.air-india.hold', group: 'air', op: 'air-india', label: 'Air India, in the hold', mode: 'Flight · hold', stress: 3, hours: 3.5 });
+      const lim = V('air.air-india.hold.weight_kg'); const bl = [], co = [];
+      for (const p of pets) {
+        const wc = petWeightWithCarrier(p) ?? p.w;
+        if (wc < lim.min) bl.push({ r: 'air.air-india.hold.weight_kg', t: `${p.name} is under ${lim.min} kg. Air India takes pets of ${lim.min}–${lim.max} kg in the hold. Smaller pets go in the cabin.` });
+        else if (wc > lim.max) bl.push({ r: 'air.air-india.hold.weight_kg', t: `${p.name} weighs over ${lim.max} kg with the crate. It must go as cargo.` });
+        else co.push({ r: 'air.air-india.hold.weight_kg', t: `${p.name} with the crate must stay within ${lim.min}–${lim.max} kg. The limit depends on the aircraft.` });
+        if (breedFlat(p)) bl.push({ r: 'air.air-india.brachy_hold', t: `${p.name} is a flat-faced breed. Not allowed in the hold.` });
+        if (ageMonths(D(p.dob), at) < V('air.air-india.min_age').holdMonths) bl.push({ r: 'air.air-india.min_age', t: `${p.name} will be under 3 months old.` });
+      }
+      co.push({ r: 'air.air-india.hold.weight_kg', t: 'The aircraft on your flight must take pets in the hold.' });
+      o.blockers = bl; o.conds = co; o.notes = [{ r: 'air.air-india.connections', t: R('air.air-india.connections').s }];
+      o.risk = ['Hold travel carries heat and handling risk. Talk to your vet, crate-train early and avoid long layovers.'];
+      o.cost = { min: V('air.air-india.fee_inr').hold * pets.length, max: V('air.air-india.fee_inr').hold * pets.length, basis: 'per sector, plus taxes' };
+      o.lead = '48 h before the flight'; o.stressNote = 'Separated from you for the flight.';
+      add(o);
+    }
+    {
+      const o = mk({ key: 'air.akasa.hold', group: 'air', op: 'akasa', label: 'Akasa Air, in the hold', mode: 'Flight · hold', stress: 3, hours: 3 });
+      const lim = V('air.akasa.hold.max_weight_kg'); const bl = [], co = [];
+      for (const p of pets) {
+        const wc = petWeightWithCarrier(p) ?? p.w;
+        if (wc > lim.hold) bl.push({ r: 'air.akasa.hold.max_weight_kg', t: `${p.name} weighs over ${lim.hold} kg with the crate. See Akasa cargo.` });
+        else co.push({ r: 'air.akasa.hold.max_weight_kg', t: `${p.name} with the crate must be ${lim.hold} kg or less. Crate up to 36 × 28 × 28 inches.` });
+        if (breedFlat(p)) bl.push({ r: 'air.akasa.brachy_hold', t: `${p.name} is a flat-faced breed. Not allowed in the hold.` });
+        if (ageMonths(D(p.dob), at) < 3) bl.push({ r: 'air.akasa.min_age', t: `${p.name} will be under 3 months old.` });
+      }
+      if (pets.length > 1) bl.push({ r: 'air.akasa.pets_per_flight', t: 'Akasa takes 1 pet in the hold per flight.' });
+      co.unshift({ r: 'air.akasa.pets_per_flight', t: 'The one hold slot on your flight must be free.' });
+      o.blockers = bl; o.conds = co; o.notes = [{ r: 'air.akasa.nonstop_only', t: R('air.akasa.nonstop_only').s }];
+      o.risk = ['Hold travel carries heat and handling risk. Talk to your vet and crate-train early.'];
+      o.cost = { min: 15000, max: 15000, basis: 'including taxes' }; o.lead = '24 h, at the airport counter'; o.stressNote = 'Separated from you for the flight.';
+      add(o);
+    }
+    if (pets.some(p => (petWeightWithCarrier(p) ?? p.w) > 32)) {
+      add({ key: 'air.akasa.cargo', group: 'air', op: 'akasa', label: 'Akasa Air, via cargo terminal', mode: 'Flight · cargo', stress: 4, hours: 5, conds: [{ r: 'air.akasa.hold.max_weight_kg', t: 'Pet plus crate up to 100 kg, booked via the Care Centre or cargo terminal.' }], cost: { text: 'Not published' }, lead: '24 h before', stressNote: 'Unaccompanied cargo.' });
+    }
+    add({ key: 'air.spicejet.cargo', group: 'air', op: 'spicejet', label: 'SpiceJet, cargo', mode: 'Flight · cargo', stress: 4, hours: 5, conds: [{ r: 'air.spicejet.cargo', t: 'Email cargocare@spicejet.com to check availability, weights and fees. Details are not published.' }], cost: { text: 'Not published' }, lead: 'Ask SpiceJet', stressNote: 'Unaccompanied cargo.' });
+    // ---- rail
+    {
+      const o = mk({ key: 'rail.1a', group: 'rail', op: 'indian-railways', label: 'Train, First AC coupe or cabin', mode: 'Train · 1A', stress: 2, hours: 20 });
+      o.conds = [
+        { r: 'rail.ir.dog.allowed_classes', t: `Book ${trip.travellers >= 3 ? '4 berths (a cabin)' : '2 berths (a coupe)'} in First AC on one PNR.` },
+        { r: 'rail.ir.chart.first_chart', t: 'A coupe or cabin must be allotted at charting. You learn this hours before departure.' },
+        { r: 'rail.ir.dog.allowed_classes', t: 'Your ticket must be confirmed. Waitlisted or RAC tickets cannot get a coupe.' },
+        { r: 'rail.ir.dog.allowed_classes', t: 'The train must have a First AC coach.' },
+      ];
+      if (trip.travellers === 1) o.conds.push({ r: 'rail.ir.dog.allowed_classes', t: 'You travel alone. A single ticket rarely gets a coupe. The second berth must be booked for a real person travelling with you.' });
+      if (pets.length > 1) o.conds.push({ r: 'rail.ir.dogs_per_pnr', t: 'You have more than one pet. Southern Railway allows one dog per PNR; IRCTC is unclear.' });
+      o.notes = [{ r: 'rail.ir.coupe.request_office', t: 'A request letter to the DRM or GM office can help. It is not required and not a guarantee.' }, { r: 'rail.ir.pet_ticket.refund', t: R('rail.ir.pet_ticket.refund').s }];
+      const fr = V('rail.ir.fare.reported_range_inr'); o.cost = { min: fr.min * pets.length, max: fr.max * pets.length, basis: 'pet fare, traveller-reported, plus your 1A tickets', rule: 'rail.ir.fare.reported_range_inr' };
+      o.lead = `Book when booking opens (~${V('rail.ir.booking.arp_days').days} days)`; o.stressNote = 'Pet stays with you in a closed coupe. Uncertain until charting.';
+      add(o);
+    }
+    {
+      const o = mk({ key: 'rail.dogbox', group: 'rail', op: 'indian-railways', label: 'Train, brake-van dog box', mode: 'Train · dog box', stress: 4, hours: 20 });
+      o.conds = [{ r: 'rail.ir.dogbox.availability', t: 'Only on trains with a dog box, mostly older ICF rakes. Check your train.' }, { r: 'rail.ir.pet_ticket.offline_min_hours_before', t: 'Book at the parcel office at least 3 hours before departure.' }];
+      if (pets.length > 1) o.conds.push({ r: 'rail.ir.dogbox.capacity', t: 'One dog per dog box, and trains usually carry one box.' });
+      const month = at.getMonth();
+      const warn = pets.filter(p => breedFlat(p) || ageMonths(D(p.dob), at) >= 96);
+      if (warn.length) o.risk.push(`Not advised for ${warn.map(p => p.name).join(' and ')}: flat-faced or elderly pets are at high risk in a closed brake van. (Thresholds to be set by a vet.)`);
+      if (month >= 3 && month <= 5) o.risk.push('Summer journey. Do not use the dog box for journeys over 12 hours in summer. (Threshold to be set by a vet.)');
+      o.risk.push('No ventilation or temperature control. You feed and water the pet at halts.');
+      o.notes = [{ r: 'rail.ir.dogbox.restraint', t: R('rail.ir.dogbox.restraint').s }];
+      const fr = V('rail.ir.fare.reported_range_inr'); o.cost = { min: fr.min * pets.length, max: fr.max * pets.length, basis: 'pet fare, traveller-reported, plus your ticket', rule: 'rail.ir.fare.reported_range_inr' };
+      o.lead = 'Parcel office, 3 h before'; o.stressNote = 'Separated from you in a metal box. Use only if nothing else works.';
+      add(o);
+    }
+    {
+      const max = V('rail.ir.basket.kitten_puppy_any_class').maxAgeMonths;
+      const o = mk({ key: 'rail.basket', group: 'rail', op: 'indian-railways', label: 'Train, kitten or puppy in a basket (any class)', mode: 'Train · any class', stress: 2, hours: 20 });
+      const old = pets.filter(p => ageMonths(D(p.dob), at) >= max);
+      if (old.length) o.blockers = [{ r: 'rail.ir.basket.kitten_puppy_any_class', t: `Only for kittens and puppies small enough for a basket. ${old.map(p => p.name).join(' and ')} ${old.length > 1 ? 'are' : 'is'} too old.` }];
+      else o.conds = [{ r: 'rail.ir.basket.kitten_puppy_any_class', t: 'Needs the Station Master\'s permission. Stations apply this rule unevenly. Carry the rule sheet.' }];
+      o.cost = { min: 160, max: 800, basis: 'pet fare, traveller-reported', rule: 'rail.ir.fare.reported_range_inr' }; o.lead = 'Any confirmed ticket'; o.stressNote = 'Pet stays with you in a basket.';
+      add(o);
+    }
+    // ---- operators that carry no pets
+    [['air.indigo.pets', 'indigo', 'IndiGo'], ['air.air-india-express.pets', 'air-india-express', 'Air India Express'], ['air.star-air.pets', 'star-air', 'Star Air'], ['air.spicejet.cabin', 'spicejet', 'SpiceJet, in the cabin']].forEach(([rid, op, label]) =>
+      add({ key: rid, group: 'air', op, label, mode: 'Flight', stress: 9, hours: 99, blockers: [{ r: rid, t: R(rid).s }] }));
+  }
+  if (trip.kind === 'export') {
+    const c = trip.country;
+    const name = COUNTRIES.find(x => x[0] === c)[1];
+    if (c === 'australia' || c === 'nz') {
+      add({ key: 'intl.' + c, group: 'intl', op: c, label: `Direct move to ${name}`, mode: 'International', stress: 9, hours: 99, blockers: [{ r: c === 'nz' ? 'intl.nz.direct' : 'intl.australia.direct', t: 'Not possible directly from India. Your pet must first live in an approved third country.' }] });
+    } else {
+      const o = mk({ key: 'intl.' + c, group: 'intl', op: c, label: `Move to ${name}, on your own`, mode: 'International', stress: 3, hours: 12 });
+      const req = { uk: 'intl.uk.requirements', eu: 'intl.eu.requirements', usa: 'intl.usa.requirements', canada: 'intl.canada.requirements', uae: 'intl.uae.requirements' }[c];
+      o.conds = [{ r: req, t: R(req).s }, { r: 'intl.aqcs.export.appointment_days_before', t: 'AQCS export certificate about 7 days before travel, valid 10 days.' }];
+      if (['uk', 'eu', 'usa', 'uae'].includes(c)) o.conds.push({ r: 'intl.titre.labs_in_india', t: 'The titre blood sample must go to a lab abroad.' });
+      if (c === 'usa') { pets.forEach(p => { if (p.species === 'dog' && ageMonths(D(p.dob), at) < 6) o.blockers.push({ r: 'intl.usa.requirements', t: `${p.name} will be under 6 months old on your date.` }); if (p.species === 'cat') o.notes.push({ r: 'intl.usa.requirements', t: `The CDC dog rules do not cover cats like ${p.name}. US state rules may apply.` }); }); }
+      if (['usa', 'canada', 'uk', 'uae'].includes(c)) o.notes.push({ r: 'air.air-india.intl_route_bans', t: R('air.air-india.intl_route_bans').s });
+      if (c === 'eu' && pets.length > 5) o.blockers.push({ r: 'intl.eu.requirements', t: 'The EU allows up to 5 pets.' });
+      o.cost = { text: 'Varies by airline and lab' }; o.lead = ['uk', 'eu'].includes(c) ? '4+ months' : c === 'usa' ? '2+ months' : '1+ month'; o.stressNote = c === 'uk' ? 'Cargo only. Long timeline.' : 'Long timeline, many documents.';
+      add(o);
+      add({ key: 'intl.agency', group: 'intl', op: 'aqcs', label: 'Use a relocation agency', mode: 'International', stress: 2, hours: 12, conds: [{ r: 'intl.agency.cost', t: 'Agencies handle AQCS, the airline and paperwork. Check reviews; scams exist.' }], cost: { min: 200000, max: 500000, basis: 'published agency ranges', rule: 'intl.agency.cost' }, lead: 'Ask the agency', stressNote: 'Less work for you. Advisable for the USA, cargo-only routes, large dogs and tight timelines.' });
+    }
+  }
+  if (trip.kind === 'import') {
+    const o = mk({ key: 'intl.import', group: 'intl', op: 'aqcs', label: 'Bring your pet into India', mode: 'International', stress: 3, hours: 12 });
+    o.conds = [{ r: 'intl.aqcs.import.advance_noc', t: 'Advance NOC on ATITHI 2.0 at least 7 days before departure.' }, { r: 'intl.aqcs.import.rabies_window', t: 'Rabies vaccine given more than 1 month and within 12 months before departure.' }];
+    if (trip.tor) { if (pets.length > 2) o.blockers.push({ r: 'intl.aqcs.import.max_pets_baggage', t: 'Only 2 pets can come in as baggage.' }); o.notes.push({ r: 'intl.aqcs.import.max_pets_baggage', t: 'Transfer of residence: the NOC is enough. No DGFT licence.' }); }
+    else if (trip.reimport) o.notes.push({ r: 'intl.aqcs.import.dgft_needed', t: 'Re-import: bring the earlier AQCS export certificate. No DGFT licence.' });
+    else o.conds.push({ r: 'intl.aqcs.import.dgft_needed', t: 'You need a DGFT import licence. Travellers report 30–45 days to get one.' });
+    o.cost = { min: 1000, max: 1000, basis: 'AQCS fee, plus airline and vet costs', rule: 'intl.aqcs.import.fee_inr' }; o.lead = trip.tor || trip.reimport ? '7+ days' : '45+ days'; o.stressNote = 'Short inspection on arrival.';
+    add(o);
+  }
+  out.forEach(o => { o.status = o.blockers.length ? 'not_possible' : (o.conds.length ? 'conditional' : 'possible'); });
+  return out;
+}
+const STATUS = { possible: ['ok', 'Possible'], conditional: ['warn', 'Possible with conditions'], not_possible: ['bad', 'Not possible'] };
+function sortOptions(list) {
+  const so = { possible: 0, conditional: 1, not_possible: 2 };
+  const key = o => S.priority === 'cost' ? (o.cost?.min ?? 1e9) : S.priority === 'fast' ? o.hours : o.stress;
+  return [...list].sort((a, b) => so[a.status] - so[b.status] || key(a) - key(b));
+}
+
+/* ============================================================
+   Small render helpers
+   ============================================================ */
+const ICON = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  chev: '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>',
+  trips: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M15 6v12" stroke-dasharray="2 2"/></svg>',
+  pets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="9" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="17" cy="9" r="2"/><path d="M8 17c0-3 2-5 4-5s4 2 4 5c0 2-2 2-4 2s-4 0-4-2z"/></svg>',
+  rules: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>',
+};
+function src(id) {
+  const r = R(id); if (!r) return '';
+  const pub = r.src.length ? SOURCES[r.src[0]].pub : 'No source yet';
+  return `<button class="src" data-act="rule" data-arg="${id}" aria-label="Rule source: ${esc(pub)}"><span class="conf c-${r.conf}">${CONF[r.conf]}</span><span class="src-t">${esc(pub)} · checked ${fmt(D(r.checked))}</span>${r.verify ? '<span class="vf">VERIFY</span>' : ''}${overdue(r) ? '<span class="vf">Being re-checked</span>' : ''}</button>`;
+}
+function reasons(items, cls, mark) {
+  if (!items || !items.length) return '';
+  return `<ul class="reasons">${items.map(x => `<li class="${cls}"><span class="dot" aria-hidden="true">${mark}</span><div><span>${esc(x.t)}</span>${x.r ? src(x.r) : ''}</div></li>`).join('')}</ul>`;
+}
+function trav(k) { const x = SOURCES[k]; return `<span class="row" style="gap:6px"><span class="conf c-traveller">Traveller-reported</span><a class="xs" href="${x.url}" target="_blank" rel="noopener">${esc(x.t)}</a></span>`; }
+function ruleLine(id, text) { return `<li class="n"><span class="dot" aria-hidden="true">i</span><div><span>${esc(text || R(id).s)}</span>${src(id)}</div></li>`; }
+function costText(c) { if (!c) return '—'; if (c.text) return esc(c.text); return c.min === c.max ? inr(c.min) : `${inr(c.min)}–${inr(c.max)}`; }
+function ticket(trip) {
+  const pets = trip.petIds.map(pet).map(p => p.name).join(', ');
+  const to = trip.kind === 'export' ? COUNTRIES.find(c => c[0] === trip.country)[1] : trip.to;
+  const kind = { domestic: 'Within India', export: 'Moving abroad', import: 'Coming to India' }[trip.kind];
+  return `<div class="ticket"><div class="t-top"><div class="row between"><span class="eyebrow">${kind}</span><button class="btn ghost sm" data-act="editTrip" style="min-height:28px;padding-block:0">Edit</button></div><div class="t-route"><span>${esc(trip.from)}</span><span class="arr" aria-hidden="true">→</span><span>${esc(to)}</span></div></div>
+  <div class="t-bottom"><div><span>Date</span><span class="mono">${fmt(D(trip.date))}</span></div><div><span>Travellers</span><span class="mono">${trip.travellers}${trip.infant ? ' + infant' : ''}</span></div><div><span>Pets</span><span>${esc(pets)}</span></div></div></div>`;
+}
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2600); }
+function openSheet(html) { document.getElementById('sheet').innerHTML = `<div class="grab"></div>${html}`; document.getElementById('sheetWrap').hidden = false; document.getElementById('sheet').scrollTop = 0; }
+function closeSheet() { document.getElementById('sheetWrap').hidden = true; }
+async function copy(text) { try { await navigator.clipboard.writeText(text); toast('Copied'); } catch { toast('Copy blocked here. Select the text and copy it.'); } }
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+const TITLES = { home: 'Pet Travel Planner', wizard: 'Plan a trip', options: 'Your options', plan: 'Trip plan', wrong: 'Something went wrong', wrongDetail: 'What to do', letter: 'Coupe request letter', rulesheet: 'Rule sheet for staff', vet: 'Vet certificate format', rules: 'Rules library', myths: 'Common myths', pets: 'Pets and documents', pet: 'Pet', petForm: 'Add a pet', carrierForm: 'Carrier', trips: 'Your trips', report: 'Trip report', script: 'Airline booking text', aqcsEmail: 'AQCS appointment email', importList: 'Import checklist' };
+const TAB_OF = { home: 'home', wizard: 'trips', options: 'trips', plan: 'trips', trips: 'trips', wrong: 'trips', wrongDetail: 'trips', letter: 'trips', rulesheet: 'trips', vet: 'trips', report: 'trips', script: 'trips', aqcsEmail: 'trips', importList: 'trips', pets: 'pets', pet: 'pets', petForm: 'pets', carrierForm: 'pets', rules: 'rules', myths: 'rules' };
+function go(view, params = {}, replace = false) { if (!replace) S.stack.push({ view: S.view, params: S.params }); S.view = view; S.params = params; render(); window.scrollTo(0, 0); }
+function back() { const p = S.stack.pop(); if (p) { S.view = p.view; S.params = p.params; render(); window.scrollTo(0, 0); } }
+function tab(view) { S.stack = []; S.view = view; S.params = {}; render(); window.scrollTo(0, 0); }
+
+function render() {
+  const title = S.view === 'pet' ? (pet(S.params.id)?.name || 'Pet') : (TITLES[S.view] || '');
+  const right = S.view === 'plan' ? `<button class="btn ${S.signedIn ? 'secondary' : 'primary'} sm" data-act="save">${S.signedIn ? 'Saved' : 'Save trip'}</button>` : '';
+  document.getElementById('bar').innerHTML = `${S.stack.length ? `<button class="iconbtn" data-act="back" aria-label="Back">${ICON.back}</button>` : ''}<h1>${esc(title)}</h1>${right}`;
+  const cur = TAB_OF[S.view];
+  document.getElementById('tabs').innerHTML = [['home', 'Home'], ['trips', 'Trips'], ['pets', 'Pets'], ['rules', 'Rules']].map(([v, l]) => `<button data-act="tab" data-arg="${v}" aria-current="${cur === v}">${ICON[v]}${l}</button>`).join('');
+  document.getElementById('main').innerHTML = (VIEWS[S.view] || VIEWS.home)();
+}
+
+/* ============================================================
+   Views
+   ============================================================ */
+const VIEWS = {};
+
+VIEWS.home = () => {
+  const expiring = [...S.vacc.map(v => ({ name: `${pet(v.pet).name}: ${v.type} vaccination`, until: v.until })), ...S.docs.filter(d => d.expires).map(d => ({ name: `${pet(d.pet)?.name || ''}: ${d.type}`, until: d.expires }))]
+    .map(x => ({ ...x, days: daysBetween(TODAY, D(x.until)) })).filter(x => x.days >= 0 && x.days <= 30);
+  return `
+  <section class="hero">
+    <h2>Plan a trip with your dog or cat</h2>
+    <p class="muted">Trains, domestic flights and international moves. Every rule shows its source and the date we last checked it.</p>
+    <button class="btn primary block" data-act="startWizard">Plan a trip</button>
+  </section>
+  <form class="field" data-form="search">
+    <label for="homeSearch">Check a rule</label>
+    <input type="search" id="homeSearch" placeholder="For example: Air India weight limit">
+  </form>
+  ${expiring.length ? `<section class="section"><header><h3>Expiring soon</h3></header><div class="stack-s">${expiring.map(x => `<div class="callout warn"><span><b>${esc(x.name)}</b> expires in ${x.days} days (${fmt(D(x.until))}).</span></div>`).join('')}</div></section>` : ''}
+  <section class="section">
+    <header class="row between"><h3>Your pets</h3><button class="btn ghost sm" data-act="addPet">Add a pet</button></header>
+    <div class="pets-row">${S.pets.map(p => `<button class="chip" data-act="openPet" data-arg="${p.id}"><span class="avatar ${p.species}">${esc(p.name[0])}</span><span class="stack-s" style="gap:0"><b>${esc(p.name)}</b><span class="xs muted">${esc(p.breed)} · ${p.w} kg</span></span></button>`).join('')}</div>
+  </section>
+  <section class="section">
+    <header><h3>Sample trips</h3><p class="small muted">These fill the planner with example data so you can check each flow.</p></header>
+    <div class="list">
+      ${[['s-dog12', 'Bruno, 12 kg dog', 'Delhi to Bengaluru. Too heavy for any cabin.'], ['s-cat4', 'Mishti, 4 kg cat', 'Mumbai to Delhi. Cabin options, rail 1A.'], ['s-pug', 'Oreo, a pug', 'Delhi to Bengaluru. Flat-faced: no hold.'], ['s-infant', 'Mishti, travelling with an infant', 'Bengaluru to Hyderabad. Cabin blocked on three airlines.'], ['p-uk', 'Bruno moving to the UK', 'Titre test, 3-month wait, cargo only.'], ['s-aus', 'Mishti moving to Australia', 'Not possible directly.'], ['p-import', 'Coming to India as a visitor', 'Needs a DGFT licence.']].map(([k, t, d]) => `<button data-act="scenario" data-arg="${k}"><span class="grow"><b>${t}</b><span class="small muted">${d}</span></span>${ICON.chev}</button>`).join('')}
+    </div>
+  </section>
+  <p class="foot">Not affiliated with Indian Railways, IRCTC, any airline or any government body. Rules change; confirm with the operator. Every rule links to its source.</p>`;
+};
+
+VIEWS.trips = () => `
+  <button class="btn primary block" data-act="startWizard">Plan a new trip</button>
+  ${S.trips.length ? `<div class="list">${S.trips.map((t, i) => `<button data-act="openTrip" data-arg="${i}"><span class="grow"><b>${esc(t.from)} → ${esc(t.kind === 'export' ? COUNTRIES.find(c => c[0] === t.country)[1] : t.to)}</b><span class="small muted">${fmt(D(t.date))} · ${t.petIds.map(pet).map(p => p.name).join(', ')} · ${esc(t.optionLabel || 'No option chosen')}</span></span>${ICON.chev}</button>`).join('')}</div>` : `<div class="card flat"><p>No saved trips yet. Plan a trip, choose an option and tap <b>Save trip</b>.</p></div>`}`;
+
+/* ---- Wizard ---- */
+VIEWS.wizard = () => {
+  const w = S.wz;
+  const step1 = `
+    <div class="stack">
+      <span class="eyebrow">Step 1 of 2</span>
+      <h2>Where are you going?</h2>
+      <div class="seg" role="group" aria-label="Trip type">
+        ${[['domestic', 'Within India'], ['export', 'Moving abroad'], ['import', 'Coming to India']].map(([k, l]) => `<button data-act="wzKind" data-arg="${k}" aria-pressed="${w.kind === k}">${l}</button>`).join('')}
+      </div>
+      ${w.kind === 'domestic' ? `
+        <div class="grid2">
+          <div class="field"><label for="wzFrom">From</label><select id="wzFrom" data-change="wz" data-k="from">${CITIES.map(c => `<option ${c === w.from ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+          <div class="field"><label for="wzTo">To</label><select id="wzTo" data-change="wz" data-k="to">${CITIES.map(c => `<option ${c === w.to ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+        </div>` : w.kind === 'export' ? `
+        <div class="field"><label for="wzFromE">Leaving from</label><select id="wzFromE" data-change="wz" data-k="from">${AQCS_CITIES.map(c => `<option ${c === w.from ? 'selected' : ''}>${c}</option>`).join('')}</select><span class="hint">Pets leave India from these six cities, which have an AQCS station.</span></div>
+        <div class="field"><label for="wzCountry">Going to</label><select id="wzCountry" data-change="wz" data-k="country">${COUNTRIES.map(([k, l]) => `<option value="${k}" ${k === w.country ? 'selected' : ''}>${l}</option>`).join('')}</select></div>` : `
+        <div class="field"><label for="wzFromI">Coming from (country)</label><input type="text" id="wzFromI" value="${esc(w.fromCountry || 'Canada')}" data-change="wz" data-k="fromCountry"></div>
+        <div class="field"><label for="wzToI">Arriving at</label><select id="wzToI" data-change="wz" data-k="to">${AQCS_CITIES.map(c => `<option ${c === w.to ? 'selected' : ''}>${c}</option>`).join('')}</select><span class="hint">Pets enter India only at these six airports.</span></div>
+        <fieldset class="card flat" style="border:0"><legend class="lbl" style="padding:0">Have you lived abroad for 2 years or more, and are you moving back to India?</legend>
+          <div class="seg">${[['yes', 'Yes'], ['no', 'No, visiting']].map(([k, l]) => `<button data-act="wzTor" data-arg="${k}" aria-pressed="${(w.tor === true && k === 'yes') || (w.tor === false && k === 'no')}">${l}</button>`).join('')}</div>
+          ${w.tor === false ? `<span class="lbl">Did your pet leave India earlier with an AQCS export certificate?</span><div class="seg">${[['yes', 'Yes'], ['no', 'No']].map(([k, l]) => `<button data-act="wzRe" data-arg="${k}" aria-pressed="${(w.reimport === true && k === 'yes') || (w.reimport === false && k === 'no')}">${l}</button>`).join('')}</div>` : ''}
+        </fieldset>`}
+      <div class="grid2">
+        <div class="field"><label for="wzDate">${w.kind === 'domestic' ? 'Travel date' : 'Target travel date'}</label><input type="date" id="wzDate" value="${w.date}" min="${iso(TODAY)}" data-change="wz" data-k="date"></div>
+        ${w.kind === 'domestic' ? `<div class="field"><label for="wzRet">Return (optional)</label><input type="date" id="wzRet" value="${w.ret || ''}" min="${w.date}" data-change="wz" data-k="ret"></div>` : ''}
+      </div>
+      ${w.err ? `<div class="callout bad">${esc(w.err)}</div>` : ''}
+      <button class="btn primary block" data-act="wzNext">Next</button>
+    </div>`;
+  const step2 = `
+    <div class="stack">
+      <span class="eyebrow">Step 2 of 2</span>
+      <h2>Who is travelling?</h2>
+      <div class="card">
+        <div class="row between"><span class="lbl">People travelling</span><div class="stepper"><button data-act="wzTrav" data-arg="-1" aria-label="Fewer">−</button><output class="mono">${w.travellers}</output><button data-act="wzTrav" data-arg="1" aria-label="More">+</button></div></div>
+        <hr>
+        <label class="check"><input type="checkbox" id="wzInfant" data-change="wzBool" data-k="infant" ${w.infant ? 'checked' : ''}><span><b>An infant is travelling</b><br><span class="small muted">Some airlines do not allow a cabin pet then.</span></span></label>
+        <label class="check"><input type="checkbox" id="wzWheel" data-change="wzBool" data-k="wheelchair" ${w.wheelchair ? 'checked' : ''}><span><b>Someone needs wheelchair assistance</b></span></label>
+      </div>
+      <div class="stack-s">
+        <span class="lbl">Which pets?</span>
+        ${S.pets.map(p => `<label class="check card" style="flex-direction:row;padding:12px 14px"><input type="checkbox" data-change="wzPet" value="${p.id}" id="wzPet-${p.id}" ${w.petIds.includes(p.id) ? 'checked' : ''}><span class="avatar ${p.species}">${esc(p.name[0])}</span><span><b>${esc(p.name)}</b><br><span class="small muted">${esc(p.breed)} · ${p.w} kg${p.wc ? ` (${p.wc} kg with carrier)` : ''} · ${ageText(D(p.dob))}</span></span></label>`).join('')}
+        <button class="btn ghost" data-act="addPet">Add a pet</button>
+      </div>
+      ${w.err ? `<div class="callout bad">${esc(w.err)}</div>` : ''}
+      <div class="grid2"><button class="btn secondary" data-act="wzBack">Back</button><button class="btn primary" data-act="wzDone">See options</button></div>
+    </div>`;
+  return w.step === 1 ? step1 : step2;
+};
+
+/* ---- Options ---- */
+VIEWS.options = () => {
+  const t = S.trip;
+  const opts = sortOptions(evaluate(t));
+  const ok = opts.filter(o => o.status !== 'not_possible'), no = opts.filter(o => o.status === 'not_possible');
+  const card = o => {
+    const [cls, lab] = STATUS[o.status];
+    const top = o.status === 'not_possible' ? o.blockers.slice(0, 1) : o.conds.slice(0, 2);
+    return `<article class="opt ${o.status === 'not_possible' ? 'np' : ''}">
+      <div class="opt-h"><div class="stack-s" style="gap:2px"><span class="eyebrow">${esc(o.mode)}</span><h3>${esc(o.label)}</h3></div><span class="pill ${cls}">${lab}</span></div>
+      ${reasons(top, o.status === 'not_possible' ? 'b' : 'c', o.status === 'not_possible' ? '×' : '!')}
+      ${o.status !== 'not_possible' ? `<div class="meta"><div><span>Cost</span><span class="mono">${costText(o.cost)}</span></div><div><span>Book by</span><span>${esc(o.lead || '—')}</span></div><div><span>Stress</span><span>${'●'.repeat(Math.min(o.stress, 4))}<span class="muted">${'○'.repeat(4 - Math.min(o.stress, 4))}</span></span></div></div>
+      ${o.cost?.basis ? `<p class="xs muted">Cost: ${esc(o.cost.basis)}.</p>` : ''}
+      <p class="small">${esc(o.stressNote || '')}</p>` : ''}
+      ${(o.blockers.length + o.conds.length + o.notes.length + o.risk.length) > top.length ? `<details><summary>All reasons and sources</summary><div class="stack">
+        ${o.blockers.length ? `<div class="stack-s"><span class="lbl">Why not</span>${reasons(o.blockers, 'b', '×')}</div>` : ''}
+        ${o.conds.length ? `<div class="stack-s"><span class="lbl">Conditions</span>${reasons(o.conds, 'c', '!')}</div>` : ''}
+        ${o.notes.length ? `<div class="stack-s"><span class="lbl">Good to know</span>${reasons(o.notes, 'n', 'i')}</div>` : ''}
+        ${o.risk.length ? `<div class="callout warn">${o.risk.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : ''}
+      </div></details>` : ''}
+      ${o.status !== 'not_possible' ? `<button class="btn primary" data-act="choose" data-arg="${o.key}">Choose this</button>` : ''}
+    </article>`;
+  };
+  return `${ticket(t)}
+  <div class="stack-s"><span class="lbl">Sort by</span><div class="seg">${[['stress', 'Lowest stress'], ['cost', 'Lowest cost'], ['fast', 'Fastest']].map(([k, l]) => `<button data-act="prio" data-arg="${k}" aria-pressed="${S.priority === k}">${l}</button>`).join('')}</div></div>
+  <p class="small muted">${ok.length} options can work, ${no.length} cannot.${t.kind === 'domestic' ? ' No cabin option is ever certain, because each flight takes only 1 or 2 pets.' : ''}</p>
+  <div class="stack">${ok.map(card).join('')}</div>
+  ${no.length ? `<section class="section"><header><h3>Not possible for this trip</h3></header><div class="stack">${no.map(card).join('')}</div></section>` : ''}`;
+};
+
+/* ---- Plan ---- */
+function taskList(tasks) {
+  return `<ol class="tl">${tasks.map(t => { const st = S.tasks[t.id] || 'todo'; return `<li class="${st === 'done' ? 'done' : ''}"><span class="when">${t.when}</span><div class="what"><span class="t-title"><b>${esc(t.title)}</b></span>${t.detail ? `<span class="small muted">${t.detail}</span>` : ''}${t.warn ? `<span class="small" style="color:var(--warn)">${esc(t.warn)}</span>` : ''}${t.r ? src(t.r) : ''}
+    <div class="state" role="group" aria-label="Task state">${[['todo', 'To do'], ['done', 'Done'], ['skipped', 'Skipped'], ['failed', 'Failed']].map(([k, l]) => `<button class="${k === 'failed' ? 'f' : ''}" data-act="task" data-arg="${t.id}|${k}" aria-pressed="${st === k}">${l}</button>`).join('')}</div></div></li>`; }).join('')}</ol>`;
+}
+function trainsFor(trip) {
+  return TRAINS.filter(tr => { const i = tr.stops.findIndex(s => s[2] === trip.from); const j = tr.stops.findIndex(s => s[2] === trip.to); return i >= 0 && j > i; });
+}
+function chartTime(dateStr, hhmm) {
+  const c = V('rail.ir.chart.first_chart'); const [h, m] = hhmm.split(':').map(Number);
+  const dep = D(dateStr); dep.setHours(h, m, 0, 0);
+  const mins = h * 60 + m, [a, b] = c.morningWindow.map(x => { const [p, q] = x.split(':').map(Number); return p * 60 + q; });
+  if (mins >= a && mins < b) { const x = addDays(dep, -1); const [ch, cm] = c.morningChartTime.split(':').map(Number); x.setHours(ch, cm, 0, 0); return { dep, chart: x, rule: 'morning' }; }
+  return { dep, chart: new Date(dep - c.firstChartHoursBefore * 3600e3), rule: 'hours' };
+}
+
+VIEWS.plan = () => {
+  const t = S.trip, o = evaluate(t).find(x => x.key === t.option);
+  if (!o) return '<p>Choose an option first.</p>';
+  if (o.group === 'rail') return railPlan(t, o);
+  if (o.group === 'air') return airPlan(t, o);
+  if (t.kind === 'import') return importPlan(t, o);
+  return intlPlan(t, o);
+};
+function planHead(t, o, links) {
+  const [cls, lab] = STATUS[o.status];
+  return `<nav class="jump" aria-label="Sections">${links.map(([id, l]) => `<a href="#${id}" data-act="jumpTo" data-arg="${id}">${l}</a>`).join('')}</nav>
+  ${ticket(t)}
+  <div class="card"><div class="row between"><div class="stack-s" style="gap:0"><span class="eyebrow">Chosen option</span><h3>${esc(o.label)}</h3></div><span class="pill ${cls}">${lab}</span></div>
+  <div class="stack-s"><button class="btn danger block" data-act="goWrong">Something went wrong</button><button class="btn secondary block" data-act="pack">Trip pack (works offline)</button></div></div>`;
+}
+
+function railPlan(t, o) {
+  const trains = trainsFor(t);
+  if (!S.rail.train || !trains.find(x => x.no === S.rail.train)) { S.rail.train = trains[0]?.no || null; S.rail.board = null; }
+  const tr = TRAINS.find(x => x.no === S.rail.train);
+  const boardOpts = tr ? tr.stops.filter((s, i) => i < tr.stops.findIndex(z => z[2] === t.to)) : [];
+  if (tr && (!S.rail.board || !boardOpts.find(s => s[0] === S.rail.board))) S.rail.board = (boardOpts.find(s => s[2] === t.from) || boardOpts[0])[0];
+  const bs = tr ? tr.stops.find(s => s[0] === S.rail.board) : null;
+  const isOrigin = tr && tr.stops[0][0] === S.rail.board;
+  const dep = bs ? bs[3] : '20:00';
+  const origin = tr ? tr.stops[0] : null;
+  const ct = chartTime(t.date, dep);
+  const date = D(t.date);
+  const arp = V('rail.ir.booking.arp_days').days;
+  const office = OFFICES[origin ? origin[2] : t.from];
+  const letterDay = addDays(date, -(office?.lead || 4));
+  const variant = o.key;
+  const pets = t.petIds.map(pet);
+  const tasks = variant === 'rail.1a' ? [
+    { id: 'book', when: fmtS(addDays(date, -arp)), title: `Book ${t.travellers >= 3 ? '4' : '2'} First AC berths on one PNR`, detail: 'Booking opens on this date. Choose the coupe preference if shown.', r: 'rail.ir.booking.arp_days' },
+    { id: 'letter', when: fmtS(letterDay), title: 'Submit the coupe request letter', detail: office ? esc(office.office) : 'Office for this division not collected yet.', warn: isWeekend(letterDay) ? `This is a ${letterDay.toLocaleDateString('en-IN', { weekday: 'long' })}. Offices may be closed; go on the Friday before.` : '', r: 'rail.ir.coupe.request_office' },
+    { id: 'wl', when: fmtS(addDays(date, -2)), title: 'Decision point if still waitlisted or RAC', detail: 'Keep and prepare a fallback, rebook a confirmed 1A ticket, or switch mode.' },
+    { id: 'vet', when: `${fmtS(addDays(date, -2))}–${fmtS(addDays(date, -1))}`, title: 'Vet fitness certificate', detail: 'Issued 24 to 48 hours before the journey.', r: 'rail.ir.docs.fitness_cert_hours_before' },
+    { id: 'chart', when: `${fmtS(ct.chart)}<br>${fmtT(ct.chart)}`, title: 'Check your coupe status at charting', detail: 'Reminders: the day before, 1 hour before, and at charting.', r: 'rail.ir.chart.first_chart' },
+    { id: 'petticket', when: `${fmtS(ct.chart)}`, title: 'Book the pet ticket online', detail: 'After the first chart, before the final chart.', r: 'rail.ir.pet_ticket.online_window' },
+    { id: 'leave', when: `${fmtS(ct.dep)}<br>${fmtT(ct.dep)}`, title: `Board at ${bs ? bs[1] : 'your station'}`, detail: 'Carry printed documents and the rule sheet.' },
+  ] : variant === 'rail.dogbox' ? [
+    { id: 'book', when: fmtS(addDays(date, -arp)), title: 'Book your own ticket (any class)', detail: 'Pick a train that likely has a dog box.', r: 'rail.ir.dogbox.availability' },
+    { id: 'vet', when: `${fmtS(addDays(date, -2))}–${fmtS(addDays(date, -1))}`, title: 'Vet fitness certificate', r: 'rail.ir.docs.fitness_cert_hours_before' },
+    { id: 'parcel', when: `${fmtS(ct.dep)}<br>${fmtT(new Date(ct.dep - 3 * 3600e3))}`, title: 'Book the dog at the parcel office', detail: 'At least 3 hours before departure. Hand the guard\'s foil to the guard.', r: 'rail.ir.pet_ticket.offline_min_hours_before' },
+    { id: 'leave', when: `${fmtS(ct.dep)}<br>${fmtT(ct.dep)}`, title: 'Board, and check on the dog at long halts' },
+  ] : [
+    { id: 'book', when: fmtS(addDays(date, -arp)), title: 'Book a confirmed ticket (any class)', r: 'rail.ir.booking.arp_days' },
+    { id: 'vet', when: `${fmtS(addDays(date, -2))}–${fmtS(addDays(date, -1))}`, title: 'Vet fitness certificate', r: 'rail.ir.docs.fitness_cert_hours_before' },
+    { id: 'sm', when: fmtS(ct.dep), title: 'Get Station Master permission and pay the luggage charge', r: 'rail.ir.basket.kitten_puppy_any_class' },
+  ];
+  const links = [['s-train', 'Train'], ['s-time', 'Timeline'], ...(variant === 'rail.1a' ? [['s-book', 'Booking'], ['s-letter', 'Letter'], ['s-chart', 'Chart day'], ['s-ticket', 'Pet ticket'], ['s-fall', 'Fallback']] : []), ['s-board', 'On board']];
+  const ans = S.chartAns;
+  return `${planHead(t, o, links)}
+  <section class="section" id="s-train"><header><h3>Your train</h3><p class="xs muted">Sample train data for this prototype. The app will use a train data provider.</p></header>
+    ${trains.length ? `<div class="field"><label for="trainSel">Train</label><select id="trainSel" data-change="train">${trains.map(x => `<option value="${x.no}" ${x.no === S.rail.train ? 'selected' : ''}>${x.no} ${esc(x.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="boardSel">Boarding station</label><select id="boardSel" data-change="board">${boardOpts.map(s => `<option value="${s[0]}" ${s[0] === S.rail.board ? 'selected' : ''}>${esc(s[1])} (${s[0]}), dep ${s[3]}</option>`).join('')}</select></div>
+    <div class="card"><ul class="reasons">
+      <li class="${tr.has1A ? 'y' : 'b'}"><span class="dot">${tr.has1A ? '✓' : '×'}</span><div><span>${tr.has1A ? `Has First AC (${tr.coaches1A} coach)` : 'No First AC on this train. Pick another train.'}</span></div></li>
+      <li class="${isOrigin ? 'y' : 'c'}"><span class="dot">${isOrigin ? '✓' : '!'}</span><div><span>${isOrigin ? `You board at the origin, ${esc(origin[1])}.` : `The train starts at ${esc(origin[1])}. You board mid-route.`} Travellers report better coupe odds when boarding at the origin. This is not a rule.</span>${trav('rrail')}</div></li>
+      <li class="${tr.rake === 'ICF' ? 'y' : 'n'}"><span class="dot">${tr.rake === 'ICF' ? '✓' : 'i'}</span><div><span>${tr.rake === 'ICF' ? 'Older ICF rake: a brake-van dog box is likely.' : 'LHB rake: dog box unknown.'}</span>${src('rail.ir.dogbox.availability')}</div></li>
+      <li class="n"><span class="dot">i</span><div><span>Long halts (5+ minutes): ${tr.stops.filter(s => s[5] >= 5).map(s => `${esc(s[1])} ${s[3]} (${s[5]} min)`).join(', ') || 'none'}.</span></div></li>
+    </ul></div>` : `<div class="callout warn">No sample trains between ${esc(t.from)} and ${esc(t.to)}. Try Delhi, Mumbai, Bengaluru or Kolkata. In the app you can also enter a train number.</div>`}
+  </section>
+  <section class="section" id="s-time"><header><h3>Timeline</h3><p class="small muted">Dates update when you change the travel date. Mark a task as failed to open the fallback steps.</p></header>
+    <div class="field"><label for="planDate">Travel date</label><input type="date" id="planDate" value="${t.date}" min="${iso(TODAY)}" data-change="planDate"></div>
+    ${taskList(tasks)}
+    ${S.signedIn ? '' : `<div class="callout info"><span>Save the trip to get these reminders by web push and email.</span></div>`}
+  </section>
+  ${variant === 'rail.1a' ? `
+  <section class="section" id="s-book"><header><h3>Booking strategy</h3></header>
+    <div class="card">
+      ${t.travellers === 1 ? `<p><b>You travel alone.</b> A single ticket rarely gets a coupe. Book 2 berths on one PNR for yourself and a real person travelling with you.</p><p class="small muted">An empty berth can be given to someone else by the TTE. Do not book a berth in a made-up name or in your pet's name.</p>`
+        : t.travellers === 2 ? `<p><b>Two travellers:</b> book 2 First AC berths on one PNR and choose the coupe preference.</p>`
+        : t.travellers <= 4 ? `<p><b>${t.travellers} travellers:</b> book 4 First AC berths on one PNR, so a full cabin can be allotted.</p>`
+        : `<p><b>${t.travellers} travellers:</b> a cabin holds 4. Book 4 berths on the PNR that travels with the pet.</p>`}
+      ${reasons([{ r: 'rail.ir.dog.allowed_classes', t: 'The whole coupe or cabin must be on your PNR.' }, { r: 'rail.ir.dog.allowed_classes', t: 'Your ticket must be confirmed. Waitlisted and RAC tickets cannot get a coupe.' }], 'c', '!')}
+    </div>
+    <details class="card"><summary>Still waitlisted close to travel?</summary>
+      <p class="small">Decide by ${fmt(addDays(date, -2))}. Options:</p>
+      <ul class="small"><li>Keep the ticket and prepare the fallback plan.</li><li>Book a confirmed 1A ticket on another train or date. Cancellation charges apply to the old ticket.</li><li>Switch to a flight, if your pet qualifies, or road.</li></ul>
+    </details>
+  </section>
+  <section class="section" id="s-letter"><header><h3>Coupe request letter</h3><p class="small muted">It can improve your chances. It is not required and does not guarantee a coupe.</p></header>
+    ${src('rail.ir.coupe.request_office')}
+    <div class="card">
+      <span class="eyebrow">Where to submit (${esc(origin ? origin[2] : t.from)} division, train origin)</span>
+      ${office ? `<dl class="kv"><dt>Office</dt><dd>${esc(office.office)}</dd><dt>Drop point</dt><dd>${esc(office.drop)}</dd><dt>How</dt><dd>${esc(office.methods)}</dd><dt>Hours</dt><dd>${esc(office.hours)} <span class="vf">VERIFY</span></dd><dt>Submit by</dt><dd>${fmtDay(letterDay)} (${office.lead} days before)</dd></dl>
+      <div class="row"><span class="conf c-traveller">Traveller-reported</span><a class="xs" href="${SOURCES[office.src].url}" target="_blank" rel="noopener">${esc(SOURCES[office.src].t)}</a></div>`
+      : `<p>We have not collected this office yet. Travellers name the DRM office, Chief Reservation Officer or zonal HQ. Call the division's commercial office to confirm.</p>`}
+      ${!isOrigin && tr ? `<p class="small">You board mid-route. Send the letter to the origin division first; also ask at your boarding division.</p>` : ''}
+    </div>
+    <div class="grid2"><button class="btn primary" data-act="go" data-arg="letter">Draft the letter</button><button class="btn secondary" data-act="letterSubmitted">${S.tasks.letter === 'done' ? 'Submitted ✓' : 'Mark as submitted'}</button></div>
+  </section>
+  <section class="section" id="s-chart"><header><h3>Chart day</h3></header>
+    <div class="card">
+      <span class="eyebrow">Expected first chart</span>
+      <span class="big-time mono">${fmtDay(ct.chart)}, ${fmtT(ct.chart)}</span>
+      <p class="small muted">${ct.rule === 'morning' ? 'Your train leaves between 5 am and 2 pm, so the chart is due by 8 pm the evening before.' : 'About 10 hours before departure from the charting station.'} This is an estimate. Check your PNR status.</p>
+      ${src('rail.ir.chart.first_chart')}
+    </div>
+    <span class="lbl">What did you get?</span>
+    <div class="stack-s">${[['full', 'Full coupe or cabin on my PNR'], ['shared', 'A cabin shared with another PNR'], ['none', 'No coupe or cabin'], ['unsure', 'Not sure']].map(([k, l]) => `<button class="btn ${ans === k ? 'primary' : 'secondary'} block" data-act="chartAns" data-arg="${k}">${l}</button>`).join('')}</div>
+    ${ans === 'full' ? `<div class="callout ok"><b>Good. Book the pet ticket now.</b><span>Online booking is open until the final chart. See the steps below.</span><button class="btn primary sm" data-act="jumpTo" data-arg="s-ticket">Go to pet ticket</button></div>` : ''}
+    ${ans === 'shared' ? `<div class="callout warn"><b>This does not meet the rule.</b><span>The whole cabin must be on your PNR. If a co-passenger objects, the dog can be moved to the guard's van with no refund. The TTE has discretion.</span>${src('rail.ir.copassenger_objection')}<button class="btn primary sm" data-act="jumpTo" data-arg="s-fall">See the fallback plan</button></div>` : ''}
+    ${ans === 'none' ? `<div class="callout bad"><b>No coupe was allotted.</b><span>Online pet booking will not accept this PNR. See your fallback options.</span><button class="btn primary sm" data-act="jumpTo" data-arg="s-fall">See the fallback plan</button></div>` : ''}
+    ${ans === 'unsure' ? `<div class="callout info"><b>How to check</b><span>Open PNR status and note the berth numbers. A coupe is 2 berths in one enclosed compartment; a cabin is 4. If all berths in that compartment are on your PNR, you have it.</span><span class="vf">VERIFY coupe berth numbers per coach type</span></div>` : ''}
+  </section>
+  <section class="section" id="s-ticket"><header><h3>Pet ticket</h3></header>
+    <div class="card"><span class="eyebrow">Online (main way)</span>
+      <ol class="small" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px"><li>After the first chart, open IRCTC → Trains → Dogs/Cats Booking.</li><li>Log in with your mobile OTP and email.</li><li>Enter your PNR. The system checks that a coupe or cabin is on it.</li><li>Choose the number of pets and pay.</li><li>Save a screenshot of the confirmation. The email often does not arrive.</li></ol>
+      ${src('rail.ir.pet_ticket.online_url')}
+      <p class="mono small" style="user-select:all">parcel.indianrail.gov.in/LTBook</p>
+    </div>
+    <details class="card"><summary>It says "No Dog/Cat booking allowed"</summary><ol class="small" style="margin:0;padding-left:20px"><li>Check that the whole coupe or cabin is on your PNR.</li><li>Wait a few minutes and try again.</li><li>Try another browser or device.</li><li>Go to the parcel office at least 3 hours before departure.</li></ol>${src('rail.ir.pet_ticket.offline_min_hours_before')}</details>
+    <div class="card flat"><span class="eyebrow">Parcel office (fallback)</span><p class="small">Go at least 3 hours before departure with the documents. Opening hours are not yet collected for ${esc(bs ? bs[1] : 'this station')}.${ct.dep.getHours() < 8 ? ` <b>Your train leaves at ${fmtT(ct.dep)}. The office may be closed 3 hours earlier.</b>` : ''}</p></div>
+    <dl class="kv"><dt>Fare</dt><dd>${inr(160)}–${inr(800)} per pet ${src('rail.ir.fare.reported_range_inr')}</dd><dt>Refund</dt><dd>None, even if the train is cancelled ${src('rail.ir.pet_ticket.refund')}</dd></dl>
+  </section>
+  <section class="section" id="s-fall"><header><h3>Fallback plan</h3><p class="small muted">If no coupe, or if you are refused. In order:</p></header>
+    <div class="list">${[
+      ['ask', 'Ask at the origin station', 'Ask the reservation office or the TTE whether a coupe can be reassigned after charting. Traveller-reported; not guaranteed.'],
+      ['dogbox', 'Brake-van dog box', tr && tr.rake === 'ICF' ? 'This train likely has one. One dog per box. Book at the parcel office 3 hours before.' : 'This train may not have one (LHB rake). Ask at the parcel office.'],
+      ['rebook', 'Cancel and rebook', 'Another train or date. Cancellation charges apply. Any pet fare already paid is not refunded.'],
+      ['switch', 'Switch mode', 'A flight if your pet qualifies, road, or a pet transporter.'],
+    ].map(([k, tl, d]) => `<button data-act="fallback" data-arg="${k}"><span class="grow"><b>${tl}</b><span class="small muted">${d}</span></span>${S.fallbackTaken === k ? '<span class="pill ok">I did this</span>' : ''}</button>`).join('')}</div>
+    ${pets.some(p => breedFlat(p) || ageMonths(D(p.dob), date) >= 96) ? `<div class="callout warn"><b>Dog box not advised for ${pets.filter(p => breedFlat(p) || ageMonths(D(p.dob), date) >= 96).map(p => esc(p.name)).join(', ')}.</b><span>Flat-faced and elderly pets are at high risk in a closed brake van. Thresholds will be set by a vet.</span></div>` : ''}
+  </section>` : ''}
+  ${variant === 'rail.dogbox' ? `<div class="callout warn"><b>Safety</b>${o.risk.map(x => `<span>${esc(x)}</span>`).join('')}${src('rail.ir.dogbox.restraint')}</div>` : ''}
+  <section class="section" id="s-board"><header><h3>On board</h3></header>
+    <div class="card">${['Leash, collar and chain', 'Muzzle, if your dog needs one', 'Water and a bowl', 'Food for the journey', 'Pee pads', ...(pets.some(p => p.species === 'cat') ? ['Litter tray and litter'] : []), 'Cleaning supplies', 'Printed documents: fitness certificate, vaccination card, tickets, ID'].map((x, i) => `<label class="check"><input type="checkbox" id="cl-${i}" data-change="cl" data-k="${i}" ${S.checklist[i] ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>
+    <div class="grid2"><button class="btn secondary" data-act="go" data-arg="rulesheet">Rule sheet for staff</button><button class="btn secondary" data-act="go" data-arg="vet">Vet format</button></div>
+    <details class="card"><summary>If asked to pay a fine</summary><p class="small">The official penalty for an unbooked dog is six times the luggage rate. Any fine must come with an official railway receipt. Do not make informal payments. If you are asked to, note the time and place and complain on RailMadad.</p>${src('rail.ir.penalty.unbooked_dog')}<button class="btn ghost sm" data-act="wrongItem" data-arg="fine">RailMadad complaint text</button></details>
+  </section>
+  <section class="section"><header><h3>After the trip</h3></header><button class="btn secondary block" data-act="go" data-arg="report">Answer the trip report (90 seconds)</button></section>`;
+}
+
+function airPlan(t, o) {
+  const op = o.op, date = D(t.date);
+  const isCabin = o.key.endsWith('.cabin');
+  const lim = op === 'air-india' ? V('air.air-india.cabin.carrier_in') : op === 'akasa' ? (isCabin ? V('air.akasa.cabin.container_in') : V('air.akasa.hold.container_in')) : op === 'fly91' ? V('air.fly91.cabin.container_in') : op === 'alliance' ? V('air.alliance.cabin') : null;
+  const car = S.carriers.find(c => c.id === S.flight.carrier) || S.carriers[0];
+  const [fh, fm] = S.flight.time.split(':').map(Number); const dep = new Date(date); dep.setHours(fh, fm, 0, 0);
+  const report = op === 'air-india' ? 3 : 2;
+  const rows = {
+    'air-india': [['Weight', 'air.air-india.cabin.max_weight_kg'], ['Carrier', 'air.air-india.cabin.carrier_in'], ['Seat', 'air.air-india.cabin.class'], ['Per flight', 'air.air-india.cabin.pets_per_flight'], ['Per passenger', 'air.air-india.pets_per_passenger'], ['Hold', 'air.air-india.hold.weight_kg'], ['Minimum age', 'air.air-india.min_age'], ['Fee', 'air.air-india.fee_inr'], ['Booking', 'air.air-india.booking'], ['Reporting', 'air.air-india.report_hours_before'], ['Certificate', 'air.air-india.health_cert_days'], ['Indemnity', 'air.air-india.indemnity_copies'], ['Breeds', 'air.air-india.brachy_hold'], ['Connections', 'air.air-india.connections'], ['Sedation', 'air.all.sedation']],
+    akasa: [['Weight', isCabin ? 'air.akasa.cabin.max_weight_kg' : 'air.akasa.hold.max_weight_kg'], ['Container', isCabin ? 'air.akasa.cabin.container_in' : 'air.akasa.hold.container_in'], ['Per flight', 'air.akasa.pets_per_flight'], ['Per passenger', 'air.akasa.pets_per_passenger'], ['Minimum age', 'air.akasa.min_age'], ['Fee', 'air.akasa.fee_inr'], ['Booking', 'air.akasa.booking'], ['Reporting', 'air.akasa.report_hours_before'], ['Certificate', 'air.akasa.health_cert'], ['Muzzle', 'air.akasa.muzzle'], ['Seat', 'air.akasa.seat'], ['Flights', 'air.akasa.nonstop_only'], ['Breeds', 'air.akasa.brachy_hold'], ['Sedation', 'air.all.sedation']],
+    fly91: [['Weight', 'air.fly91.cabin.max_weight_kg'], ['Container', 'air.fly91.cabin.container_in'], ['Per flight', 'air.fly91.pets_per_flight'], ['Minimum age', 'air.fly91.min_age'], ['Fee', 'air.fly91.fee_inr'], ['Booking', 'air.fly91.booking'], ['Muzzle', 'air.fly91.muzzle'], ['Network', 'air.fly91.network'], ['Sedation', 'air.all.sedation']],
+    alliance: [['Cabin', 'air.alliance.cabin'], ['Fee', 'air.alliance.fee'], ['Hold', 'air.alliance.hold']],
+    spicejet: [['Cabin', 'air.spicejet.cabin'], ['Cargo', 'air.spicejet.cargo']],
+  }[op] || [];
+  let cert = '';
+  if (op === 'air-india') { const from = addDays(date, -V('air.air-india.health_cert_days').days), to = addDays(date, -2); cert = `<p><b>Vet visit between ${fmt(from)} and ${fmt(to)}.</b></p><p class="small muted">The certificate must be issued within 7 days before departure, and uploaded before the 48-hour pet booking cutoff.</p>${src('air.air-india.health_cert_days')}`; }
+  else if (op === 'akasa') cert = `<p><b>Vet visit on ${fmt(addDays(date, -2))} or ${fmt(addDays(date, -1))}.</b></p><p class="small">Get it within 72 hours of travel to be safe. Akasa's FAQ says it is valid for 15 days, which may cover a return flight.</p>${src('air.akasa.health_cert')}`;
+  else cert = `<p class="small">The airline asks for a signed and stamped vet letter. No validity period is stated. Get it close to the flight.</p>`;
+  const fit = lim && car ? fitCheck(car, lim) : null;
+  return `${planHead(t, o, [['a-rules', 'Rules'], ['a-fit', 'Carrier'], ['a-cert', 'Certificate'], ['a-book', 'Booking'], ['a-day', 'Airport day']])}
+  <section class="section" id="a-rules"><header><h3>${esc(OPS[op])} rules</h3></header>
+    <div class="list">${rows.map(([k, id]) => `<div style="flex-direction:column;align-items:flex-start;gap:4px;cursor:default"><span class="eyebrow">${k}</span><span>${esc(R(id).s)}</span>${src(id)}</div>`).join('')}</div>
+    <div class="callout info"><b>Cabin slots are limited.</b><span>Book the pet as soon as you have your ticket. Slots go first come, first served.</span></div>
+  </section>
+  ${lim ? `<section class="section" id="a-fit"><header><h3>Carrier fit check</h3><p class="small muted">Borderline means within 0.5 inch on any side.</p></header>
+    <div class="field"><label for="carSel">Carrier</label><select id="carSel" data-change="flightCar">${S.carriers.map(c => `<option value="${c.id}" ${c.id === car?.id ? 'selected' : ''}>${esc(c.name)} (${c.l}×${c.w}×${c.h} in, ${c.type})</option>`).join('')}</select></div>
+    ${fit ? `<div class="card"><div class="row between"><span class="lbl">Result</span><span class="pill ${fit.st === 'pass' ? 'ok' : fit.st === 'border' ? 'warn' : 'bad'}">${fit.st === 'pass' ? 'Fits' : fit.st === 'border' ? 'Borderline' : 'Does not fit'}</span></div>
+      <div class="fit"><span class="h">Side</span><span class="h">Yours</span><span class="h">Limit</span><span class="h">Margin</span>${fit.rows.map(x => `<span>${x.n}</span><span class="mono">${x.have} in</span><span class="mono">${x.max} in</span><span class="mono" style="color:var(--${x.st === 'pass' ? 'ok' : x.st === 'border' ? 'warn' : 'bad'})">${x.m >= 0 ? '+' : ''}${x.m}</span>`).join('')}</div>
+      ${fit.softFail ? '<p class="small" style="color:var(--bad)">Air India needs a soft carrier.</p>' : ''}
+      ${src(op === 'air-india' ? 'air.air-india.cabin.carrier_in' : op === 'akasa' ? (isCabin ? 'air.akasa.cabin.container_in' : 'air.akasa.hold.container_in') : op === 'fly91' ? 'air.fly91.cabin.container_in' : 'air.alliance.cabin')}</div>` : ''}
+    <button class="btn ghost" data-act="addCarrier">Add a carrier</button>
+  </section>` : ''}
+  <section class="section" id="a-cert"><header><h3>Vet certificate</h3></header><div class="card">${cert}</div><button class="btn secondary" data-act="go" data-arg="vet">Vet certificate format</button></section>
+  <section class="section" id="a-book"><header><h3>Book the pet</h3></header>
+    ${op === 'akasa' && isCabin ? `<div class="card"><span class="eyebrow">Call the Akasa Care Centre</span><p class="mono big-time" style="font-size:22px;user-select:all">+91 96061 12131</p><div class="row"><button class="btn secondary sm" data-act="copyText" data-arg="+91 96061 12131">Copy number</button></div>${src('air.akasa.booking')}</div>` : ''}
+    <button class="btn secondary block" data-act="go" data-arg="script">${op === 'akasa' ? 'Call script' : op === 'air-india' ? 'Support portal text' : 'Request text'}</button>
+    <div class="field"><label for="bookRef">Pet booking reference</label><input type="text" id="bookRef" value="${esc(S.flight.ref)}" placeholder="Note it when confirmed" data-change="bookRef"></div>
+  </section>
+  <section class="section" id="a-day"><header><h3>Airport day</h3></header>
+    <div class="field"><label for="flTime">Flight departs at</label><input type="time" id="flTime" value="${S.flight.time}" data-change="flTime"></div>
+    <ol class="tl">${[
+      [fmtT(new Date(dep - report * 3600e3)), `Arrive at the airport (${report} hours before)`],
+      [fmtT(new Date(dep - (report - 0.25) * 3600e3)), 'Pet counter: documents and weighing'],
+      [fmtT(new Date(dep - (report - 0.75) * 3600e3)), 'Pay the pet fee if not prepaid'],
+      [fmtT(new Date(dep - 1.5 * 3600e3)), 'Security. The pet may need to come out of the carrier.'],
+      [fmtT(new Date(dep - 0.75 * 3600e3)), 'Boarding'],
+    ].map(([w, x]) => `<li><span class="when">${w}</span><div class="what"><span>${x}</span></div></li>`).join('')}</ol>
+    ${!isCabin ? `<div class="callout warn"><b>Hold safety</b><span>Heat and long layovers are the main risks. Crate-train for weeks. Flat-faced breeds are not allowed. This guidance will be reviewed by a vet before launch.</span></div>` : ''}
+  </section>`;
+}
+
+function intlPlan(t, o) {
+  const c = o.op, date = D(t.date), name = COUNTRIES.find(x => x[0] === t.country)?.[1];
+  if (o.key === 'intl.agency') return `${planHead(t, o, [['i-ag', 'Agency']])}<section class="section" id="i-ag"><div class="card"><p>Agencies handle the AQCS certificate, airline booking, crate and paperwork.</p>${reasons(o.conds, 'c', '!')}<p class="small">An agency is advisable for the USA, cargo-only routes like the UK, large dogs and tight timelines. We do not list agencies in v1.</p></div></section>`;
+  if (c === 'australia' || c === 'nz') return `${ticket(t)}<div class="card"><h3>Not possible directly from India</h3><p>${esc(R(c === 'nz' ? 'intl.nz.direct' : 'intl.australia.direct').s)}</p>${src(c === 'nz' ? 'intl.nz.direct' : 'intl.australia.direct')}<p class="small">The usual route: move the pet to an approved country (for example the UAE, Singapore or the UK), live there for the required period, then follow that country's export process. A detailed planner comes after v1.</p></div>`;
+  const I = S.intl, lab = 21;
+  let earliest = null, steps = [], note = '';
+  const vacc = I.vacc ? D(I.vacc) : null, titre = I.titre ? D(I.titre) : null;
+  if (c === 'uk' || c === 'eu') {
+    const v = vacc || TODAY;
+    const sample = titre || maxDate(addDays(v, 30), TODAY);
+    earliest = addDays(addMonths(sample, 3), titre ? 0 : 0);
+    if (!titre) earliest = addDays(earliest, lab);
+    note = `Earliest = the later of (vaccination date + 30 days) and today, plus 3 months${titre ? '' : `, plus ${lab} days for the lab result`}.`;
+  } else if (c === 'usa') {
+    const v = vacc || TODAY;
+    const sample = titre || maxDate(addDays(v, 30), TODAY);
+    earliest = addDays(sample, 28 + (titre ? 0 : lab));
+    note = `Titre sample at least 30 days after the vaccine and at least 28 days before entry${titre ? '' : `, plus ${lab} days for the lab result`}.`;
+  } else { earliest = addDays(vacc || TODAY, c === 'canada' ? 30 : 30 + lab); note = c === 'uae' ? 'Wait period after the titre is not confirmed yet. This estimate assumes 30 days plus the lab result.' : 'Canada: rabies certificate for personal pets. This estimate allows 30 days after the vaccine.'; }
+  const target = date, okDate = target >= earliest, base = okDate ? target : earliest;
+  const v0 = vacc || TODAY;
+  if (c === 'uk' || c === 'eu') steps = [
+    [I.chip ? 'Done' : fmtS(v0), 'Microchip', 'Before or on the day of the rabies vaccine.'],
+    [vacc ? fmtS(vacc) + ' ✓' : fmtS(TODAY), 'Rabies vaccine', ''],
+    [titre ? fmtS(titre) + ' ✓' : fmtS(maxDate(addDays(v0, 30), TODAY)), 'Titre blood sample', 'At least 30 days after the vaccine. Your vet sends it to an approved lab abroad (none in India).'],
+    [fmtS(addMonths(titre || maxDate(addDays(v0, 30), TODAY), 3)), '3-month wait ends', 'Counted from the sample date.'],
+    [fmtS(addDays(base, -10)), `${c === 'uk' ? 'GB' : 'EU'} health certificate`, 'Within 10 days of arrival.'],
+    [fmtS(addDays(base, -7)), 'AQCS export certificate', 'In person, by appointment. Valid 10 days.'],
+    ...(c === 'uk' ? [[fmtS(addDays(base, -5)) + '–' + fmtS(addDays(base, -1)), 'Tapeworm treatment (dogs)', '1 to 5 days before arrival.']] : []),
+    [fmtS(base), 'Fly', c === 'uk' ? 'As cargo, on an approved route.' : 'Enter at a designated point.'],
+  ];
+  else if (c === 'usa') steps = [
+    [I.chip ? 'Done' : fmtS(v0), 'Microchip', 'Must be implanted before the rabies vaccine.'],
+    [vacc ? fmtS(vacc) + ' ✓' : fmtS(TODAY), 'Rabies vaccine', 'At 12 weeks or older.'],
+    [titre ? fmtS(titre) + ' ✓' : fmtS(maxDate(addDays(v0, 30), TODAY)), 'Titre blood sample', 'To a CDC-approved lab abroad. At least 28 days before entry.'],
+    [fmtS(addDays(base, -30)), 'Reserve a CDC-registered care facility', 'At your US arrival airport.'],
+    [fmtS(addDays(base, -30)) + '–' + fmtS(addDays(base, -7)), 'CDC vaccination form, endorsed by a government vet', 'No more than 30 days before travel.'],
+    [fmtS(addDays(base, -7)), 'AQCS export certificate', ''],
+    [fmtS(addDays(base, -3)), 'CDC Dog Import Form', 'Online, free, one per dog.'],
+    [fmtS(base), 'Fly', 'Not on Air India. Arrive at the airport where your care facility is.'],
+  ];
+  else steps = [[fmtS(addDays(base, -30)), 'Rabies vaccine and certificate', ''], ...(c === 'uae' ? [[fmtS(addDays(base, -21)), 'MOCCAE import permit', '']] : []), [fmtS(addDays(base, -7)), 'AQCS export certificate', ''], [fmtS(base), 'Fly', c === 'canada' ? 'Not on Air India.' : 'No cabin pets India→UAE on Air India.']];
+  return `${planHead(t, o, [['i-date', 'Earliest date'], ['i-time', 'Timeline'], ['i-req', 'Requirements'], ['i-docs', 'Documents']])}
+  <section class="section" id="i-date"><header><h3>Earliest possible travel date</h3><p class="small muted">Tell us where your pet is now.</p></header>
+    <label class="check"><input type="checkbox" id="iChip" data-change="intlChip" ${I.chip ? 'checked' : ''}><span>Microchipped</span></label>
+    <div class="grid2"><div class="field"><label for="iVacc">Rabies vaccine date</label><input type="date" id="iVacc" value="${I.vacc}" max="${iso(TODAY)}" data-change="intl" data-k="vacc"><span class="hint">Leave empty if not done.</span></div>
+    <div class="field"><label for="iTitre">Titre sample date</label><input type="date" id="iTitre" value="${I.titre}" max="${iso(TODAY)}" data-change="intl" data-k="titre"><span class="hint">Leave empty if not done.</span></div></div>
+    <div class="card"><span class="eyebrow">Earliest date</span><span class="big-time mono">${fmt(earliest)}</span><p class="small muted">${esc(note)}</p><p class="xs muted">The ${lab}-day lab allowance is our planning estimate, not a rule.</p>
+      ${okDate ? `<div class="callout ok"><span>Your target date, ${fmt(target)}, works.</span></div>` : `<div class="callout bad"><span><b>Your target date, ${fmt(target)}, is too early.</b> The timeline below uses the earliest date.</span></div>`}
+    </div>
+  </section>
+  <section class="section" id="i-time"><header><h3>Timeline</h3></header><ol class="tl">${steps.map(([w, x, d]) => `<li><span class="when">${w}</span><div class="what"><b>${x}</b>${d ? `<span class="small muted">${d}</span>` : ''}</div></li>`).join('')}</ol></section>
+  <section class="section" id="i-req"><header><h3>Requirements</h3></header>
+    <ul class="reasons">${o.conds.map(x => ruleLine(x.r, x.t)).join('')}${o.notes.map(x => ruleLine(x.r, x.t)).join('')}${ruleLine('intl.aqcs.export.docs')}${ruleLine('intl.aqcs.export.stations')}</ul>
+    ${c === 'usa' ? `<div class="callout warn"><b>Round trips</b><span>If you bring a US-vaccinated dog to India and back, entering a high-risk country after filing the CDC Dog Import Form invalidates the receipt. File a new form for the return.</span></div>` : ''}
+    <div class="callout info"><b>Transit</b><span>A routing through the EU or UK can add titre or entry requirements, even for a transit.</span></div>
+  </section>
+  <section class="section" id="i-docs"><header><h3>Documents</h3></header><button class="btn secondary block" data-act="go" data-arg="aqcsEmail">AQCS appointment email</button><button class="btn secondary block" data-act="go" data-arg="vet">Vet fitness certificate format</button></section>`;
+}
+
+function importPlan(t, o) {
+  const date = D(t.date), vacc = S.imp.vacc ? D(S.imp.vacc) : null;
+  const needDgft = !t.tor && !t.reimport;
+  const vOk = vacc ? (daysBetween(vacc, date) > 30 && daysBetween(vacc, date) <= 365) : null;
+  return `${planHead(t, o, [['m-route', 'Route'], ['m-time', 'Timeline'], ['m-docs', 'Checklist']])}
+  <section class="section" id="m-route"><header><h3>Your route into India</h3></header>
+    <div class="card">${t.tor ? `<p><b>Transfer of residence.</b> The AQCS NOC is enough. Up to 2 pets as baggage.</p>${src('intl.aqcs.import.max_pets_baggage')}` : t.reimport ? `<p><b>Re-import.</b> Bring the earlier AQCS export certificate. No DGFT licence.</p>${src('intl.aqcs.import.dgft_needed')}` : `<p><b>Visitor.</b> You need a DGFT import licence as well as the AQCS NOC.</p>${src('intl.aqcs.import.dgft_needed')}<p class="small muted">Travellers report 30–45 days to get the licence.</p>`}</div>
+    <div class="field"><label for="impVacc">Rabies vaccine date</label><input type="date" id="impVacc" value="${S.imp.vacc}" data-change="impVacc"></div>
+    ${vOk === null ? '' : vOk ? `<div class="callout ok"><span>The vaccine date fits: more than 1 month and within 12 months before ${fmt(date)}.</span></div>` : `<div class="callout bad"><span>The vaccine date does not fit. It must be more than 1 month and within 12 months before departure.</span></div>`}
+    ${src('intl.aqcs.import.rabies_window')}
+  </section>
+  <section class="section" id="m-time"><header><h3>Timeline</h3></header>
+    <ol class="tl">${[
+      ...(needDgft ? [[fmtS(addDays(date, -45)), 'Apply for the DGFT import licence', 'Allow 30–45 days (traveller-reported).']] : []),
+      [fmtS(addDays(date, -14)), 'Official health certificate with Annexure 2.1.1', 'Signed by the exporting country\'s authority. Pet examined within 7 days of shipment.'],
+      [fmtS(addDays(date, -7)), 'Apply for the advance NOC on ATITHI 2.0', 'At least 7 days before departure. Fee ₹1,000 on Bharatkosh.'],
+      [fmtS(date), 'Fly. The airline checks the advance NOC.', ''],
+      [fmtS(date), 'On arrival: AQCS inspection and final NOC', 'If the pet is found unfit: 15 days\' quarantine at your cost.'],
+    ].map(([w, x, d]) => `<li><span class="when">${w}</span><div class="what"><b>${x}</b>${d ? `<span class="small muted">${d}</span>` : ''}</div></li>`).join('')}</ol>
+    <ul class="reasons">${ruleLine('intl.aqcs.import.advance_noc')}${ruleLine('intl.aqcs.import.quarantine_if_unfit_days')}${ruleLine('intl.aqcs.import.unaccompanied')}</ul>
+  </section>
+  <section class="section" id="m-docs"><header><h3>Checklist</h3></header><button class="btn secondary block" data-act="go" data-arg="importList">Open the import checklist (C5)</button></section>`;
+}
+
+/* ---- Something went wrong ---- */
+const WRONG = {
+  nocoupe: { mode: 'rail', t: 'No coupe or cabin allotted', steps: ['Ask at the origin station\'s reservation office or the TTE whether a coupe can be reassigned after charting. Travellers report this sometimes works.', 'If the train has a brake-van dog box, book it at the parcel office at least 3 hours before departure.', 'Otherwise cancel and rebook another train or date, or switch to a flight or road.'], rules: ['rail.ir.dog.allowed_classes', 'rail.ir.dogbox.availability'], still: 'If you cannot travel with the pet, do not board with it. An unbooked dog is fined and moved to the brake van.' },
+  online: { mode: 'rail', t: 'Online pet booking says "not allowed"', steps: ['Check that the whole coupe or cabin is on your PNR.', 'Wait a few minutes and try again.', 'Try another browser or device.', 'Go to the parcel office at least 3 hours before departure with your documents.'], rules: ['rail.ir.pet_ticket.online_window', 'rail.ir.pet_ticket.offline_min_hours_before'], still: 'If the parcel office is closed, ask the station master for help and note the time.' },
+  tte: { mode: 'rail', t: 'The TTE says I cannot travel', steps: ['Stay calm. Show your PNR, the coupe allotment and the pet ticket.', 'Show the rule sheet with the official IRCTC text.', 'Point out that pets booked online appear on the TTE\'s handheld device.'], rules: ['rail.ir.dog.allowed_classes', 'rail.ir.pet_ticket.tte_device'], still: 'If they still refuse, ask for it in writing, note names and times, and file a RailMadad complaint.', doc: 'rulesheet' },
+  fine: { mode: 'rail', t: 'I was asked to pay a fine', steps: ['Ask which rule the fine is under.', 'Pay only against an official railway receipt.', 'Do not make any informal payment.'], rules: ['rail.ir.penalty.unbooked_dog'], still: 'If asked for money without a receipt, file a RailMadad complaint (railmadad.indianrailways.gov.in).', complaint: true },
+  slot: { mode: 'air', t: 'The airline says there is no pet slot', steps: ['Ask for the next flight on the same airline that has a slot.', 'Check another airline your pet qualifies for.', 'Consider rail First AC, or change your date.'], rules: ['air.air-india.cabin.pets_per_flight', 'air.akasa.pets_per_flight'], still: 'Slots are first come, first served. Book the pet as soon as you book your ticket next time.' },
+  counter: { mode: 'air', t: 'The airport counter refuses my pet', steps: ['Ask which rule applies, and ask for the duty manager.', 'Show your pet booking reference, health certificate and indemnity form.', 'Show the airline\'s rule with its source link.'], rules: ['air.air-india.health_cert_days', 'air.akasa.health_cert'], still: 'If refused, ask for the refusal in writing and request a refund of the pet fee.' },
+};
+VIEWS.wrong = () => {
+  const mode = S.trip ? (S.trip.option?.startsWith('rail') ? 'rail' : S.trip.option?.startsWith('air') ? 'air' : null) : null;
+  const items = Object.entries(WRONG).filter(([k, x]) => !mode || x.mode === mode);
+  return `<p class="muted">Choose what happened. You will get the next steps and the official text to show staff.</p><div class="list">${items.map(([k, x]) => `<button data-act="wrongItem" data-arg="${k}"><span class="grow"><b>${x.t}</b><span class="xs muted">${x.mode === 'rail' ? 'Train' : 'Flight'}</span></span>${ICON.chev}</button>`).join('')}</div>`;
+};
+VIEWS.wrongDetail = () => {
+  const x = WRONG[S.params.k]; const l = S.letter; const t = S.trip;
+  const complaint = `I am travelling on Train No. ${S.rail.train || '[train no]'}, PNR ${l.pnr || '[PNR]'}, coach ${l.coach || '[coach]'}, with my pet ${t ? pet(t.petIds[0]).species : '[species]'} booked on luggage ticket [ticket no]. At [time] near [location], [what happened]. I hold a confirmed coupe allotted to my PNR, as required by the IRCTC terms for carrying dogs and cats. I request assistance and a review of this incident.`;
+  return `<h2>${esc(x.t)}</h2>
+  <section class="section"><header><h3>Do this now</h3></header><ol class="stack-s" style="margin:0;padding-left:20px">${x.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></section>
+  <section class="section"><header><h3>Official text to show</h3></header>${x.rules.map(id => `<div class="card">${R(id).q ? `<blockquote>${esc(R(id).q)}</blockquote>` : `<p>${esc(R(id).s)}</p>`}${src(id)}</div>`).join('')}</section>
+  <div class="callout warn"><b>If they still refuse</b><span>${esc(x.still)}</span></div>
+  ${x.doc ? `<button class="btn secondary block" data-act="go" data-arg="${x.doc}">Open the rule sheet</button>` : ''}
+  ${(x.complaint || x.mode === 'rail') ? `<section class="section"><header><h3>RailMadad complaint text</h3><p class="small muted">Fill the brackets, then paste into RailMadad.</p></header><textarea id="cmpText" aria-label="Complaint text">${esc(complaint)}</textarea><button class="btn secondary" data-act="copyEl" data-arg="cmpText">Copy text</button></section>` : ''}`;
+};
+
+/* ---- Documents ---- */
+function ph(v, name) { return v ? `<span class="filled">${esc(v)}</span>` : `<span class="ph">{{${name}}}</span>`; }
+VIEWS.letter = () => {
+  const t = S.trip || scenarioTrip('s-cat4'); const p = pet(t.petIds[0]); const l = S.letter;
+  const tr = TRAINS.find(x => x.no === S.rail.train) || trainsFor(t)[0];
+  const origin = tr ? tr.stops[0] : null; const office = OFFICES[origin ? origin[2] : t.from];
+  const board = tr ? (tr.stops.find(s => s[0] === S.rail.board) || tr.stops[0]) : null;
+  const to = tr ? tr.stops.find(s => s[2] === t.to) : null;
+  const cc = +l.berths >= 4 ? 'cabin' : 'coupe';
+  const missing = ['name', 'pnr', 'phone'].filter(k => !l[k]).length;
+  const text = `To,\nThe Divisional Railway Manager (Commercial)\n${office ? office.office : '[office]'}\n\nDate: ${fmt(TODAY)}\n\nSubject: Request for allotment of a ${cc} in First AC to travel with my pet ${p.species}, PNR ${l.pnr || '[PNR]'}\n\nRespected Sir or Madam,\n\nI have booked ${l.berths} berths in First AC on Train No. ${tr ? tr.no : '[train]'} (${tr ? tr.name : ''}), from ${board ? board[1] : '[from]'} to ${to ? to[1] : '[to]'}, departing on ${fmt(D(t.date))}. The PNR is ${l.pnr || '[PNR]'}.\n\nI will be travelling with my pet ${p.species}, ${p.name}, a ${p.breed} aged ${ageText(D(p.dob))} and weighing about ${p.w} kg. ${p.name} is fully vaccinated, and I will carry the vaccination record and a veterinary fitness certificate issued within 48 hours of the journey.\n\nUnder the IRCTC terms for carrying dogs and cats, a pet may travel with its owner in First AC only when a full coupe or cabin is allotted to a single PNR. The terms also state that requests for such allotment may be made to the Divisional Railway Manager's office or the General Manager's office.\n\nI request you to kindly allot a ${cc} to PNR ${l.pnr || '[PNR]'} at the time of charting.\n\nI will book my pet's luggage ticket after the chart is prepared. I take full responsibility for my pet's behaviour, hygiene and care throughout the journey.\n\nEnclosures:\n1. Copy of ticket\n2. Copy of photo ID\n3. Copy of vaccination record\n\nYours faithfully,\n${l.name || '[your name]'}\nPhone: ${l.phone || '[phone]'}\nEmail: ${l.email || '[email]'}`;
+  return `<p class="small muted">Filled from your trip and pet. Yellow fields are missing.</p>
+  <div class="grid2"><div class="field"><label for="lName">Your name</label><input type="text" id="lName" value="${esc(l.name)}" data-input="letter" data-k="name"></div><div class="field"><label for="lPnr">PNR</label><input type="text" id="lPnr" inputmode="numeric" value="${esc(l.pnr)}" data-input="letter" data-k="pnr"></div>
+  <div class="field"><label for="lPhone">Phone</label><input type="tel" id="lPhone" value="${esc(l.phone)}" data-input="letter" data-k="phone"></div><div class="field"><label for="lBerths">Berths booked</label><select id="lBerths" data-change="letterSel" data-k="berths"><option ${l.berths === '2' ? 'selected' : ''}>2</option><option ${l.berths === '4' ? 'selected' : ''}>4</option></select></div></div>
+  <div class="doc" id="letterDoc">
+    <p>To,<br>The Divisional Railway Manager (Commercial)<br>${office ? esc(office.office) : ph('', 'office_name')}</p>
+    <p>Date: ${fmt(TODAY)}</p>
+    <p><b>Subject: Request for allotment of a ${cc} in First AC to travel with my pet ${esc(p.species)}, PNR ${ph(l.pnr, 'pnr')}</b></p>
+    <p>Respected Sir or Madam,</p>
+    <p>I have booked ${ph(l.berths, 'berth_count')} berths in First AC on Train No. ${ph(tr?.no, 'train_no')} (${esc(tr?.name || '')}), from ${ph(board?.[1], 'from_station')} to ${ph(to?.[1], 'to_station')}, departing on ${ph(fmt(D(t.date)), 'journey_date')}. The PNR is ${ph(l.pnr, 'pnr')}.</p>
+    <p>I will be travelling with my pet ${esc(p.species)}, ${ph(p.name, 'pet_name')}, a ${ph(p.breed, 'breed')} aged ${ph(ageText(D(p.dob)), 'pet_age')} and weighing about ${ph(p.w, 'pet_weight')} kg. ${esc(p.name)} is fully vaccinated, and I will carry the vaccination record and a veterinary fitness certificate issued within 48 hours of the journey.</p>
+    <p>Under the IRCTC terms for carrying dogs and cats, a pet may travel with its owner in First AC only when a full coupe or cabin is allotted to a single PNR. The terms also state that requests for such allotment may be made to the Divisional Railway Manager's office or the General Manager's office.</p>
+    <p>I request you to kindly allot a ${cc} to PNR ${ph(l.pnr, 'pnr')} at the time of charting.</p>
+    <p>I will book my pet's luggage ticket after the chart is prepared. I take full responsibility for my pet's behaviour, hygiene and care throughout the journey.</p>
+    <p>Enclosures:<br>1. Copy of ticket<br>2. Copy of photo ID<br>3. Copy of vaccination record</p>
+    <p>Yours faithfully,<br>${ph(l.name, 'passenger_name')}<br>Phone: ${ph(l.phone, 'phone')}<br>Email: ${ph(l.email, 'email')}</p>
+  </div>
+  ${missing ? `<div class="callout warn"><span>${missing} field${missing > 1 ? 's are' : ' is'} missing. You can still copy the text; the gaps show in brackets.</span></div>` : ''}
+  <textarea id="letterText" hidden>${esc(text)}</textarea>
+  <div class="grid2"><button class="btn primary" data-act="copyEl" data-arg="letterText">Copy as text</button><button class="btn secondary" data-act="exportNote">PDF / DOCX</button></div>
+  <p class="xs muted">Template C1, version 1. Wording is stored as data and can change without a release.</p>`;
+};
+VIEWS.rulesheet = () => {
+  const t = S.trip; const l = S.letter;
+  return `<p class="small muted">One A4 page to show a TTE or parcel clerk. Prepared by you, not by the railway.</p>
+  <div class="doc">
+    <h4>Travelling with a pet dog or cat: Indian Railways rules</h4>
+    <p class="xs">Passenger: ${ph(l.name, 'name')} · Train: ${ph(S.rail.train, 'train_no')} · PNR: ${ph(l.pnr, 'pnr')} · Coupe/cabin: ${ph('', 'coupe_no')} · Pet ticket: ${ph('', 'luggage_ticket_no')}</p>
+    <ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px">
+      ${['rail.ir.dog.allowed_classes', 'rail.ir.basket.kitten_puppy_any_class', 'rail.ir.pet_ticket.tte_device'].map(id => `<li>"${esc(R(id).q)}"<br><span class="xs">Source: ${esc(SOURCES[R(id).src[0]].t)}</span></li>`).join('')}
+      <li>Documents carried: fitness certificate dated ${ph('', 'cert_date')}, vaccination card.</li>
+    </ol>
+    <div class="row" style="gap:12px;align-items:center"><svg width="64" height="64" viewBox="0 0 8 8" aria-label="QR code placeholder" style="flex:none"><rect width="8" height="8" fill="#fff"/><path d="M0 0h3v3H0zM5 0h3v3H5zM0 5h3v3H0zM4 4h1v1H4zM6 5h1v1H6zM4 6h1v2H4zM6 7h2v1H6z" fill="#111"/></svg><span class="xs">QR code to the IRCTC terms PDF: contents.irctc.co.in/en/PetBookingInTrains.pdf</span></div>
+    <p class="xs">Rules checked on ${fmt(D(CHECKED))}. This sheet is prepared by the passenger for reference.</p>
+  </div>
+  <button class="btn secondary" data-act="exportNote">Download PDF</button>`;
+};
+VIEWS.vet = () => {
+  const p = S.trip ? pet(S.trip.petIds[0]) : S.pets[0]; const t = S.trip;
+  return `<p class="small muted">For your vet to complete, sign and stamp. The watermark cannot be removed.</p>
+  <div class="doc"><div class="wm"><span>Format for vet use. Valid only when completed, signed and stamped by a registered veterinarian.</span></div>
+    <h4>Certificate of health and fitness to travel</h4>
+    <p>I have examined the animal described below on <span class="line"></span> at <span class="line"></span>.</p>
+    <p>Species: ${esc(p.species)} &nbsp; Breed: ${esc(p.breed)} &nbsp; Sex: ${esc(p.sex || '')}<br>Name: ${esc(p.name)} &nbsp; Age: ${ageText(D(p.dob))} &nbsp; Weight: <span class="line"></span> kg<br>Colour and markings: <span class="line"></span><br>Microchip no.: ${p.chip ? `<span class="mono">${esc(p.chip)}</span>` : '<span class="line"></span>'}<br>Owner: ${ph(S.letter.name, 'owner_name')} &nbsp; Phone: ${ph(S.letter.phone, 'phone')}</p>
+    <p>Rabies vaccination: date <span class="line"></span> valid until <span class="line"></span><br>Other vaccinations: <span class="line"></span></p>
+    <p>In my opinion, the animal is healthy, free from any infectious or contagious disease, and fit to travel by ${t ? (t.option?.startsWith('rail') ? 'train' : 'air') : ph('', 'mode')} on ${t ? fmt(D(t.date)) : ph('', 'travel_date')}.</p>
+    <p>Veterinarian's name: <span class="line"></span><br>Registration no.: <span class="line"></span><br>Clinic address: <span class="line"></span><br>Signature and stamp: <span class="line"></span> Date: <span class="line"></span></p>
+  </div>
+  <button class="btn secondary" data-act="exportNote">Download PDF</button>`;
+};
+VIEWS.script = () => {
+  const t = S.trip; const p = pet(t.petIds[0]); const car = carrierOf(p) || S.carriers[0]; const o = evaluate(t).find(x => x.key === t.option);
+  const aiText = `I have booked PNR ${S.letter.pnr || '[PNR]'} on flight [flight no] from ${t.from} to ${t.to} on ${fmt(D(t.date))}. I request a booking to carry my pet ${p.species} (${p.breed}, ${p.w} kg; with carrier ${petWeightWithCarrier(p) ?? '[weight]'} kg) in the ${o.key.endsWith('hold') ? 'hold' : 'cabin'}. Carrier size: ${car ? `${car.l}×${car.w}×${car.h} in` : '[size]'}. Attached: vaccination record, health certificate (or the date it will be issued), indemnity form. Please confirm the booking and fee.`;
+  return o.op === 'akasa' ? `<div class="card"><span class="eyebrow">Have ready</span><ul class="small" style="margin:0;padding-left:18px"><li>PNR, flight number and date</li><li>${esc(p.name)}: ${esc(p.species)}, ${esc(p.breed)}, ${ageText(D(p.dob))}</li><li>Weight with container: ${petWeightWithCarrier(p) ?? 'weigh first'} kg</li><li>Container: ${car ? `${car.l} × ${car.w} × ${car.h} in` : 'measure first'}</li></ul></div>
+    <div class="card"><span class="eyebrow">Say</span><p>"Is an in-cabin pet slot available on this flight?"</p><p>"Please add the pet booking to my PNR and confirm the fee and reference number."</p></div>
+    <div class="card flat"><p class="small">Note the reference number and the agent's name.</p><p class="mono" style="user-select:all">+91 96061 12131</p>${src('air.akasa.booking')}</div>`
+    : `<p class="small muted">Paste this into the ${esc(OPS[o.op])} support request.</p><textarea id="aiText" aria-label="Request text">${esc(aiText)}</textarea><button class="btn primary" data-act="copyEl" data-arg="aiText">Copy text</button>${src(o.op === 'air-india' ? 'air.air-india.booking' : 'air.fly91.booking')}`;
+};
+VIEWS.aqcsEmail = () => {
+  const t = S.trip; const p = pet(t.petIds[0]); const name = COUNTRIES.find(x => x[0] === t.country)?.[1];
+  const txt = `Subject: Request for appointment for export health certificate, pet ${p.species}, departure ${fmt(D(t.date))}\n\nDear Sir or Madam,\n\nI plan to travel from ${t.from} to ${name} on ${fmt(D(t.date))} with my pet ${p.species}, ${p.name} (${p.breed}, microchip ${p.chip || '[microchip no]'}).\n\nI request an appointment at the AQCS ${t.from} station for inspection and issue of the export health certificate, around ${fmt(addDays(D(t.date), -7))}.\n\nI will bring the local vet's fitness certificate, microchip certificate, vaccination record, my passport and ticket, ${t.country === 'uk' ? 'the airway bill, ' : ''}two 4×6 inch photographs of my pet, and the destination country's requirements.\n\nPlease let me know an available date and time.\n\nRegards,\n${S.letter.name || '[your name]'}\n${S.letter.phone || '[phone]'}`;
+  return `<p class="small muted">Template C4. Send it to the AQCS station, or call to confirm the appointment.</p><textarea id="aqText" style="min-height:360px" aria-label="Email text">${esc(txt)}</textarea><button class="btn primary" data-act="copyEl" data-arg="aqText">Copy text</button>${src('intl.aqcs.export.appointment_days_before')}`;
+};
+VIEWS.importList = () => {
+  const t = S.trip; const items = ['Owner passport, and visa or residence proof', ...(t.tor ? ['Proof of transfer of residence (2 years abroad)'] : []), 'Air ticket (accompanied) or airway bill (unaccompanied, arriving within 1 month of you)', 'Official health certificate with Annexure 2.1.1. Your name must match the ticket.', 'Rabies vaccination certificate', 'Microchip certificate', ...(!t.tor && !t.reimport ? ['DGFT import licence'] : []), ...(t.reimport ? ['Earlier AQCS export certificate'] : []), 'Advance NOC from ATITHI 2.0 (apply at least 7 days before)', 'On arrival: present the pet to AQCS for the final NOC'];
+  return `<div class="card">${items.map((x, i) => `<label class="check"><input type="checkbox" id="imp-${i}"><span>${esc(x)}</span></label>`).join('')}</div><ul class="reasons">${ruleLine('intl.aqcs.import.advance_noc')}${ruleLine('intl.aqcs.import.fee_inr')}</ul>`;
+};
+
+/* ---- Rules library ---- */
+VIEWS.rules = () => {
+  const q = (S.params.q || '').toLowerCase();
+  const list = Object.values(RULES).filter(r => !q || (r.s + ' ' + OPS[r.op] + ' ' + r.id).toLowerCase().includes(q));
+  const groups = {}; list.forEach(r => (groups[r.op] ||= []).push(r));
+  const nVerify = Object.values(RULES).filter(r => r.verify).length, nOver = Object.values(RULES).filter(overdue).length;
+  return `<form data-form="rulesSearch" class="field"><label for="rq">Search rules</label><input type="search" id="rq" value="${esc(S.params.q || '')}" placeholder="Operator, topic or words" data-input="rq"></form>
+  <div class="row small muted"><span class="mono">${Object.keys(RULES).length}</span> rules · <span class="mono">${nOver}</span> being re-checked · <span class="mono">${nVerify}</span> open VERIFY items</div>
+  <button class="btn secondary" data-act="go" data-arg="myths">Common myths</button>
+  ${Object.keys(groups).length ? Object.entries(groups).map(([op, rs]) => `<section class="section"><header><h3>${esc(OPS[op])}</h3></header><div class="list">${rs.map(r => `<button data-act="rule" data-arg="${r.id}"><span class="grow"><span>${esc(r.s)}</span><span class="row" style="gap:6px"><span class="conf c-${r.conf}">${CONF[r.conf]}</span>${r.verify ? '<span class="vf">VERIFY</span>' : ''}<span class="xs muted">checked ${fmt(D(r.checked))}</span></span></span>${ICON.chev}</button>`).join('')}</div></section>`).join('') : `<div class="card flat"><p>No rules match "${esc(S.params.q)}".</p></div>`}`;
+};
+VIEWS.myths = () => {
+  const M = [
+    ['Air India allows only 7 kg in the cabin.', 'The current limit is 10 kg including the carrier.', 'air.air-india.cabin.max_weight_kg'],
+    ['Only Air India allows pets in the cabin.', 'Akasa, Fly91 and Alliance Air also do.', 'air.akasa.cabin.max_weight_kg'],
+    ['Pets are only allowed in 1AC.', 'Kittens and puppies in a basket can go in any class.', 'rail.ir.basket.kitten_puppy_any_class'],
+    ['Always go to the parcel office 3 hours early.', 'Not needed where online booking works. Still needed for the dog box and when online booking fails.', 'rail.ir.pet_ticket.online_window'],
+    ['A coupe letter guarantees a coupe.', 'It helps. It is not required and not a guarantee.', 'rail.ir.coupe.request_office'],
+    ['The rail pet fare is ₹30 per kg.', 'It is the luggage rate on a fixed weight, with a ₹30 minimum.', 'rail.ir.fare.notional_weight_kg'],
+    ['India quarantines imported pets for weeks.', 'Now a short inspection on arrival. 15 days only if the pet is found unfit.', 'intl.aqcs.import.quarantine_if_unfit_days'],
+  ];
+  return M.map(([m, f, id]) => `<div class="card"><span class="eyebrow">Myth</span><p style="text-decoration:line-through;color:var(--muted)">${esc(m)}</p><span class="eyebrow">What the rules say</span><p>${esc(f)}</p>${src(id)}</div>`).join('');
+};
+
+/* ---- Pets ---- */
+VIEWS.pets = () => `
+  <button class="btn primary block" data-act="addPet">Add a pet</button>
+  <div class="list">${S.pets.map(p => `<button data-act="openPet" data-arg="${p.id}"><span class="avatar ${p.species}">${esc(p.name[0])}</span><span class="grow"><b>${esc(p.name)}</b><span class="small muted">${esc(p.breed)} · ${p.w} kg · ${ageText(D(p.dob))}${breedFlat(p) ? ' · flat-faced' : ''}</span></span>${ICON.chev}</button>`).join('')}</div>
+  <section class="section"><header class="row between"><h3>Carriers</h3><button class="btn ghost sm" data-act="addCarrier">Add</button></header>
+  <div class="list">${S.carriers.map(c => `<div style="cursor:default"><span class="grow"><b>${esc(c.name)}</b><span class="small muted mono">${c.l} × ${c.w} × ${c.h} in · ${c.type} · ${c.kg ?? '?'} kg</span></span></div>`).join('') || '<div>No carriers yet.</div>'}</div></section>`;
+VIEWS.pet = () => {
+  const p = pet(S.params.id); if (!p) return '';
+  const vs = S.vacc.filter(v => v.pet === p.id), ds = S.docs.filter(d => d.pet === p.id);
+  const exp = d => { const n = daysBetween(TODAY, D(d)); return n < 0 ? '<span class="pill bad">Expired</span>' : n <= 30 ? `<span class="pill warn">${n} days left</span>` : ''; };
+  return `<div class="card"><div class="row"><span class="avatar ${p.species}" style="width:52px;height:52px;font-size:22px">${esc(p.name[0])}</span><div class="stack-s" style="gap:0"><h2>${esc(p.name)}</h2><span class="muted small">${esc(p.breed)}</span></div></div>
+    <dl class="kv"><dt>Species</dt><dd>${p.species === 'dog' ? 'Dog' : 'Cat'}</dd><dt>Age</dt><dd>${ageText(D(p.dob))} (born ${fmt(D(p.dob))})</dd><dt>Weight</dt><dd class="mono">${p.w} kg</dd><dt>With carrier</dt><dd class="mono">${petWeightWithCarrier(p) ?? '—'} kg</dd><dt>Microchip</dt><dd class="mono">${esc(p.chip) || '—'}</dd><dt>Flat-faced</dt><dd>${breedFlat(p) ? 'Yes. Flagged in all airline hold checks.' : 'No'}</dd><dt>Carrier</dt><dd>${carrierOf(p) ? esc(carrierOf(p).name) : '—'}</dd></dl>
+    <button class="btn secondary sm" data-act="editPet" data-arg="${p.id}">Edit</button></div>
+  <section class="section"><header class="row between"><h3>Vaccinations</h3></header>
+    <div class="list">${vs.map(v => `<div style="cursor:default"><span class="grow"><b>${esc(v.type)}</b><span class="small muted">Given ${fmt(D(v.given))} · valid until ${fmt(D(v.until))} · ${esc(v.vet)}</span></span>${exp(v.until)}</div>`).join('') || '<div>None yet.</div>'}</div>
+    <form class="card flat" data-form="vacc"><span class="lbl">Add a vaccination</span><div class="grid2"><div class="field"><label for="vType">Vaccine</label><select id="vType"><option>Rabies</option><option>DHPPi</option><option>DHLPP</option><option>FVRCP</option><option>Other</option></select></div><div class="field"><label for="vGiven">Date given</label><input type="date" id="vGiven" required max="${iso(TODAY)}"></div><div class="field"><label for="vUntil">Valid until</label><input type="date" id="vUntil"></div><div class="field"><label for="vVet">Vet name</label><input type="text" id="vVet"></div></div><button class="btn secondary">Add vaccination</button></form>
+  </section>
+  <section class="section"><header><h3>Documents</h3><p class="small muted">Private to your account. Only you can see them.</p></header>
+    <div class="list">${ds.map(d => `<div style="cursor:default"><span class="grow"><b>${esc(d.type)}</b><span class="small muted">${esc(d.file)}${d.expires ? ` · expires ${fmt(D(d.expires))}` : ''}</span></span>${d.expires ? exp(d.expires) : ''}<button class="btn ghost sm" data-act="delDoc" data-arg="${d.id}">Delete</button></div>`).join('') || '<div>None yet.</div>'}</div>
+    <form class="card flat" data-form="doc"><div class="grid2"><div class="field"><label for="dType">Type</label><select id="dType">${['Vaccination card', 'Fitness certificate', 'Microchip certificate', 'Titre result', 'AQCS certificate', 'NOC', 'Airline indemnity form', 'Other'].map(x => `<option>${x}</option>`).join('')}</select></div><div class="field"><label for="dExp">Expires on</label><input type="date" id="dExp"></div></div>
+      <div class="field"><label for="dFile">File (photo or PDF, up to 10 MB)</label><input type="file" id="dFile" accept="image/*,application/pdf" required></div><button class="btn secondary">Upload</button></form>
+  </section>`;
+};
+VIEWS.petForm = () => {
+  const p = S.params.id ? pet(S.params.id) : { name: '', species: 'dog', breed: 'Indie (INDog)', dob: '', w: '', wc: '', chip: '', carrier: '', flat: false };
+  const sp = S.params.sp || p.species;
+  const br = BREEDS[sp];
+  const mixed = (S.params.breed || p.breed) === 'Mixed or other';
+  return `<p class="small muted">Only name, species, weight and date of birth are needed. You can add the rest later.</p>
+  <form class="stack" data-form="pet">
+    <div class="field"><label for="pName">Name</label><input type="text" id="pName" required value="${esc(p.name)}" maxlength="60"></div>
+    <div class="stack-s"><span class="lbl">Species</span><div class="seg">${[['dog', 'Dog'], ['cat', 'Cat']].map(([k, l]) => `<button type="button" data-act="petSp" data-arg="${k}" aria-pressed="${sp === k}">${l}</button>`).join('')}</div></div>
+    <div class="field"><label for="pBreed">Breed</label><select id="pBreed" data-change="petBreed">${br.map(([n, f]) => `<option ${n === (S.params.breed || p.breed) ? 'selected' : ''}>${n}${f ? ' (flat-faced)' : ''}</option>`).join('')}</select><span class="hint">Sample list. Flat-faced breeds are blocked from airline holds.</span></div>
+    ${mixed ? `<label class="check"><input type="checkbox" id="pFlat" ${p.flat ? 'checked' : ''}><span>My pet has a short, flat face</span></label>` : ''}
+    <div class="grid2"><div class="field"><label for="pDob">Date of birth</label><input type="date" id="pDob" required value="${p.dob}" max="${iso(TODAY)}"></div><div class="field"><label for="pW">Weight (kg)</label><input type="number" id="pW" required step="0.1" min="0.1" max="120" value="${p.w}"></div></div>
+    <details><summary>More details (optional)</summary><div class="stack">
+      <div class="field"><label for="pWc">Weight with carrier (kg)</label><input type="number" id="pWc" step="0.1" min="0.1" max="130" value="${p.wc ?? ''}"></div>
+      <div class="field"><label for="pChip">Microchip number</label><input type="text" id="pChip" inputmode="numeric" value="${esc(p.chip)}"></div>
+      <div class="field"><label for="pCar">Carrier</label><select id="pCar"><option value="">None</option>${S.carriers.map(c => `<option value="${c.id}" ${c.id === p.carrier ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
+    </div></details>
+    <button class="btn primary block">${S.params.id ? 'Save' : 'Add pet'}</button>
+  </form>`;
+};
+VIEWS.carrierForm = () => `<form class="stack" data-form="carrier">
+  <div class="field"><label for="cName">Name</label><input type="text" id="cName" required placeholder="For example: Blue soft bag"></div>
+  <div class="stack-s"><span class="lbl">Type</span><div class="seg"><button type="button" data-act="carType" data-arg="soft" aria-pressed="${(S.params.type || 'soft') === 'soft'}">Soft</button><button type="button" data-act="carType" data-arg="hard" aria-pressed="${S.params.type === 'hard'}">Hard</button></div></div>
+  <div class="stack-s"><span class="lbl">Unit</span><div class="seg"><button type="button" data-act="carUnit" data-arg="in" aria-pressed="${(S.params.unit || 'in') === 'in'}">Inches</button><button type="button" data-act="carUnit" data-arg="cm" aria-pressed="${S.params.unit === 'cm'}">Centimetres</button></div></div>
+  <div class="grid3"><div class="field"><label for="cL">Length</label><input type="number" id="cL" required step="0.1" min="1"></div><div class="field"><label for="cW">Width</label><input type="number" id="cW" required step="0.1" min="1"></div><div class="field"><label for="cH">Height</label><input type="number" id="cH" required step="0.1" min="1"></div></div>
+  <div class="field"><label for="cKg">Empty weight (kg)</label><input type="number" id="cKg" step="0.1" min="0"></div>
+  <button class="btn primary block">Save carrier</button></form>`;
+
+/* ---- Report ---- */
+VIEWS.report = () => {
+  if (S.reportDone) return `<div class="card"><h3>Thank you</h3><p>Your report is anonymous. When 5 or more travellers report on the same train or office, we show the counts to others, labelled Traveller-reported.</p></div><button class="btn secondary" data-act="tab" data-arg="home">Back to home</button>`;
+  const Q = [['origin', 'Did you board at the origin station?'], ['letter', 'Did you submit a coupe letter?'], ['coupe', 'Did you get a coupe or cabin?'], ['online', 'Did you book the pet ticket online?'], ['docs', 'Were your documents checked?'], ['problem', 'Did you have any problems?']];
+  return `<p class="small muted">Six quick questions. About 90 seconds.</p>
+  ${Q.map(([k, q]) => `<div class="stack-s"><span class="lbl">${q}</span><div class="seg">${['Yes', 'No', 'Not sure'].map(a => `<button data-act="rep" data-arg="${k}|${a}" aria-pressed="${S.report[k] === a}">${a}</button>`).join('')}</div></div>`).join('')}
+  <div class="field"><label for="repText">Anything others should know? (optional)</label><textarea id="repText" style="min-height:80px" placeholder="Reviewed before it is shown"></textarea></div>
+  <button class="btn primary block" data-act="repSubmit">Send report</button>`;
+};
+
+/* ============================================================
+   Scenarios
+   ============================================================ */
+function baseTrip(x) { return Object.assign({ kind: 'domestic', from: 'Delhi', to: 'Bengaluru', country: 'uk', date: iso(addDays(TODAY, 21)), ret: '', travellers: 2, infant: false, wheelchair: false, petIds: ['p1'], tor: null, reimport: null, option: null }, x); }
+function scenarioTrip(k) {
+  return {
+    's-dog12': baseTrip({ petIds: ['p1'] }),
+    's-cat4': baseTrip({ from: 'Mumbai', to: 'Delhi', petIds: ['p2'] }),
+    's-pug': baseTrip({ petIds: ['p3'] }),
+    's-infant': baseTrip({ from: 'Bengaluru', to: 'Hyderabad', petIds: ['p2'], infant: true }),
+    'p-uk': baseTrip({ kind: 'export', from: 'Delhi', country: 'uk', date: iso(addDays(TODAY, 90)), petIds: ['p1'] }),
+    'p-usa': baseTrip({ kind: 'export', from: 'Mumbai', country: 'usa', date: iso(addDays(TODAY, 75)), petIds: ['p1'] }),
+    's-aus': baseTrip({ kind: 'export', from: 'Bengaluru', country: 'australia', date: iso(addDays(TODAY, 90)), petIds: ['p2'] }),
+    'p-import': baseTrip({ kind: 'import', from: 'Canada', to: 'Bengaluru', date: iso(addDays(TODAY, 60)), petIds: ['p1'], tor: false, reimport: false }),
+    'p-rail': baseTrip({ from: 'Bengaluru', to: 'Delhi', petIds: ['p1'], option: 'rail.1a' }),
+    'p-dogbox': baseTrip({ from: 'Delhi', to: 'Bengaluru', travellers: 1, petIds: ['p1'], option: 'rail.dogbox' }),
+    'p-air': baseTrip({ from: 'Mumbai', to: 'Delhi', petIds: ['p2'], option: 'air.akasa.cabin' }),
+  }[k];
+}
+function runScenario(k) {
+  const t = scenarioTrip(k); S.trip = t; S.chartAns = null; S.stack = [{ view: 'home', params: {} }];
+  if (k === 'p-uk' || k === 'p-usa') { t.option = 'intl.' + t.country; S.intl = { chip: true, vacc: iso(addDays(TODAY, -40)), titre: '' }; }
+  if (k === 'p-import') t.option = 'intl.import';
+  if (k === 'p-rail') S.rail = { train: '90001', board: 'SBC' };
+  if (k === 'p-dogbox') S.rail = { train: '90004', board: 'NDLS' };
+  if (t.option) { S.stack.push({ view: 'options', params: {} }); S.view = 'plan'; S.params = {}; }
+  else { S.view = 'options'; S.params = {}; }
+  render(); window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   Actions
+   ============================================================ */
+const A = {
+  back, tab: v => tab(v), go: v => go(v),
+  rule: id => {
+    const r = R(id); const due = dueOn(r);
+    openSheet(`<div class="sh-h"><div class="stack-s" style="gap:2px"><span class="eyebrow">${esc(OPS[r.op])}</span><span class="xs mono muted" style="word-break:break-all">${r.id}</span></div><button class="iconbtn" data-act="closeSheet" aria-label="Close">✕</button></div>
+      <p style="font-size:17px">${esc(r.s)}</p>
+      ${r.q ? `<div class="stack-s"><span class="lbl">Official text</span><blockquote>${esc(r.q)}</blockquote></div>` : ''}
+      <div class="row"><span class="conf c-${r.conf}">${CONF[r.conf]}</span>${r.verify ? '<span class="vf">VERIFY</span>' : ''}</div>
+      ${r.verify ? `<div class="callout warn"><span><b>Open item:</b> ${esc(r.verify)}</span></div>` : ''}
+      ${r.note ? `<div class="callout info"><span>${esc(r.note)}</span></div>` : ''}
+      ${overdue(r) ? `<div class="callout bad"><span><b>Being re-checked.</b> This rule is past its review date.</span></div>` : ''}
+      <div class="stack-s"><span class="lbl">Sources</span>${r.src.length ? r.src.map(k => { const s = SOURCES[k]; return `<div class="card flat" style="gap:4px"><a href="${s.url}" target="_blank" rel="noopener">${esc(s.t)}</a><span class="xs muted">${s.type === 'official' ? 'Official source' : s.type === 'secondary' ? 'Secondary source' : 'Traveller reports'}${s.date ? ` · dated ${fmt(D(s.date))}` : ''} · read ${fmt(D(r.checked))}</span></div>`; }).join('') : '<div class="callout bad"><span>No source yet. This value is a placeholder and cannot ship.</span></div>'}</div>
+      <dl class="kv small"><dt>Last checked</dt><dd>${fmt(D(r.checked))}</dd><dt>Review every</dt><dd>${r.every} days</dd><dt>Next review</dt><dd>${fmt(due)}</dd><dt>Change history</dt><dd>Version 1 (seed). No changes yet.</dd></dl>
+      <button class="btn primary" data-act="planFromRule">Plan a trip with this</button>`);
+  },
+  closeSheet,
+  planFromRule: () => { closeSheet(); A.startWizard(); },
+  startWizard: () => { S.wz = { step: 1, kind: 'domestic', from: 'Delhi', to: 'Bengaluru', country: 'uk', fromCountry: 'Canada', date: iso(addDays(TODAY, 21)), ret: '', travellers: 2, infant: false, wheelchair: false, petIds: [S.pets[0].id], tor: null, reimport: null }; go('wizard'); },
+  editTrip: () => { const t = S.trip; S.wz = { step: 1, ...t, fromCountry: t.kind === 'import' ? t.from : 'Canada' }; go('wizard'); },
+  wzKind: k => { S.wz.kind = k; S.wz.err = ''; if (k === 'export' && !AQCS_CITIES.includes(S.wz.from)) S.wz.from = 'Delhi'; if (k === 'import' && !AQCS_CITIES.includes(S.wz.to)) S.wz.to = 'Bengaluru'; render(); },
+  wzTor: k => { S.wz.tor = k === 'yes'; if (S.wz.tor) S.wz.reimport = null; render(); },
+  wzRe: k => { S.wz.reimport = k === 'yes'; render(); },
+  wzNext: () => { const w = S.wz; w.err = ''; if (w.kind === 'domestic' && w.from === w.to) w.err = 'Choose different cities for from and to.'; else if (!w.date || D(w.date) < TODAY) w.err = 'Choose a travel date from today onwards.'; else if (w.kind === 'import' && (w.tor === null || (w.tor === false && w.reimport === null))) w.err = 'Answer the residence question so we can show the right route.'; else w.step = 2; render(); window.scrollTo(0, 0); },
+  wzBack: () => { S.wz.step = 1; S.wz.err = ''; render(); },
+  wzTrav: d => { S.wz.travellers = Math.min(8, Math.max(1, S.wz.travellers + +d)); render(); },
+  wzDone: () => { const w = S.wz; if (!w.petIds.length) { w.err = 'Choose at least one pet.'; render(); return; } const t = baseTrip({ kind: w.kind, from: w.kind === 'import' ? (w.fromCountry || 'Abroad') : w.from, to: w.to, country: w.country, date: w.date, ret: w.ret, travellers: w.travellers, infant: w.infant, wheelchair: w.wheelchair, petIds: [...w.petIds], tor: w.tor, reimport: w.reimport }); S.trip = t; S.chartAns = null; S.stack = S.stack.filter(x => x.view !== 'wizard' && x.view !== 'options'); go('options'); },
+  prio: k => { S.priority = k; render(); },
+  choose: key => { S.trip.option = key; S.trip.optionLabel = evaluate(S.trip).find(o => o.key === key).label; S.chartAns = null; if (key.startsWith('intl.') && key !== 'intl.import' && !S.intl.vacc) S.intl = { chip: true, vacc: '', titre: '' }; go('plan'); },
+  scenario: k => runScenario(k),
+  jumpTo: (id, el, e) => { e.preventDefault(); const n = document.getElementById(id); if (n) n.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); },
+  task: arg => { const [id, st] = arg.split('|'); S.tasks[id] = st; if (st === 'failed') { toast('Opening what to do next'); go('wrong'); } else render(); },
+  chartAns: k => { S.chartAns = k; render(); document.getElementById('s-chart')?.scrollIntoView({ block: 'start' }); },
+  fallback: k => { S.fallbackTaken = k; toast('Noted. This feeds your trip report.'); render(); },
+  letterSubmitted: () => { S.tasks.letter = 'done'; toast(`Letter marked as submitted on ${fmt(TODAY)}`); render(); },
+  goWrong: () => go('wrong'),
+  wrongItem: k => go('wrongDetail', { k }),
+  pack: () => openSheet(`<div class="sh-h"><h3>Trip pack</h3><button class="iconbtn" data-act="closeSheet" aria-label="Close">✕</button></div><p>The trip pack holds your timeline, checklist, documents and the rule sheet. Once opened, it works offline on the train.</p><div class="list"><button data-act="go" data-arg="rulesheet"><span class="grow"><b>Rule sheet</b><span class="small muted">One A4 page for staff</span></span>${ICON.chev}</button><button data-act="go" data-arg="vet"><span class="grow"><b>Vet certificate format</b><span class="small muted">For your vet to sign</span></span>${ICON.chev}</button></div><p class="small muted">PDF download, image checklist (1080 × 1350) and WhatsApp sharing come in the real build.</p>`),
+  save: () => { if (S.signedIn) { toast('Trip already saved'); return; } openSheet(signInSheet()); },
+  sendCode: () => { const v = document.getElementById(S.authTab === 'email' ? 'aEmail' : 'aPhone').value.trim(); if (!v) { S.authErr = S.authTab === 'email' ? 'Enter your email address.' : 'Enter your 10-digit mobile number.'; openSheet(signInSheet()); return; } S.contact = v; S.codeSent = true; S.authErr = ''; openSheet(signInSheet()); document.querySelector('.otp input')?.focus(); },
+  verify: () => { const code = [...document.querySelectorAll('.otp input')].map(i => i.value).join(''); if (code.length !== 6) { S.authErr = 'Enter the 6-digit code.'; openSheet(signInSheet()); return; } S.signedIn = true; S.codeSent = false; S.authErr = ''; const t = S.trip; if (t && !S.trips.includes(t)) S.trips.unshift(t); closeSheet(); render(); toast(document.getElementById('consent')?.checked === false ? 'Trip saved. Reminders are off.' : 'Trip saved. Reminders are set.'); },
+  addPet: () => go('petForm', { sp: 'dog' }),
+  editPet: id => go('petForm', { id, sp: pet(id).species, breed: pet(id).breed }),
+  openPet: id => go('pet', { id }),
+  petSp: k => { const name = document.getElementById('pName')?.value; S.params.sp = k; S.params.breed = BREEDS[k][0][0]; render(); if (name) document.getElementById('pName').value = name; },
+  addCarrier: () => go('carrierForm', { type: 'soft', unit: 'in' }),
+  carType: k => { S.params.type = k; keepForm(render); },
+  carUnit: k => { S.params.unit = k; keepForm(render); },
+  delDoc: id => { S.docs = S.docs.filter(d => d.id !== id); toast('Document deleted'); render(); },
+  openTrip: i => { S.trip = S.trips[+i]; go(S.trip.option ? 'plan' : 'options'); },
+  copyText: t => copy(t),
+  copyEl: id => copy(document.getElementById(id).value),
+  exportNote: () => toast('PDF and DOCX export come in the real build.'),
+  rep: arg => { const [k, a] = arg.split('|'); S.report[k] = a; render(); },
+  repSubmit: () => { S.reportDone = true; render(); window.scrollTo(0, 0); },
+};
+function keepForm(fn) { const vals = {}; document.querySelectorAll('#main input, #main select').forEach(i => { if (i.id) vals[i.id] = i.type === 'checkbox' ? i.checked : i.value; }); fn(); Object.entries(vals).forEach(([id, v]) => { const i = document.getElementById(id); if (i) { if (i.type === 'checkbox') i.checked = v; else if (i.type !== 'file') i.value = v; } }); }
+function signInSheet() {
+  const tabK = S.authTab || 'phone';
+  return `<div class="sh-h"><h3>Save your trip</h3><button class="iconbtn" data-act="closeSheet" aria-label="Close">✕</button></div>
+  <p class="small muted">Sign in to save the trip and get reminders. We collect only what the trip needs.</p>
+  ${S.codeSent ? `<div class="stack"><p>Enter the 6-digit code sent to <b>${esc(S.contact)}</b>.</p><div class="otp">${Array.from({ length: 6 }, (_, i) => `<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit ${i + 1}" id="otp${i}">`).join('')}</div><p class="xs muted">Prototype: any 6 digits work.</p>
+    <label class="check"><input type="checkbox" id="consent" checked><span class="small">Send me reminders for this trip by web push and email. You can turn them off per trip.</span></label>
+    ${S.authErr ? `<div class="callout bad">${esc(S.authErr)}</div>` : ''}<button class="btn primary block" data-act="verify">Verify and save</button><button class="btn ghost" data-act="authTab" data-arg="${tabK}">Use a different ${tabK === 'email' ? 'email' : 'number'}</button></div>`
+  : `<div class="seg"><button data-act="authTab" data-arg="phone" aria-pressed="${tabK === 'phone'}">Phone</button><button data-act="authTab" data-arg="email" aria-pressed="${tabK === 'email'}">Email</button></div>
+    ${tabK === 'phone' ? `<div class="field"><label for="aPhone">Mobile number</label><div class="row" style="flex-wrap:nowrap"><span class="mono">+91</span><input type="tel" id="aPhone" inputmode="numeric" maxlength="10" placeholder="98765 43210"></div></div>` : `<div class="field"><label for="aEmail">Email</label><input type="email" id="aEmail" placeholder="you@example.com"></div>`}
+    ${S.authErr ? `<div class="callout bad">${esc(S.authErr)}</div>` : ''}<button class="btn primary block" data-act="sendCode">Send code</button>`}`;
+}
+A.authTab = k => { S.authTab = k; S.codeSent = false; S.authErr = ''; openSheet(signInSheet()); };
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'sheetWrap') { closeSheet(); return; }
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  if (t.closest('#sheet') && ['go', 'rule'].includes(t.dataset.act) && t.dataset.act === 'go') closeSheet();
+  const fn = A[t.dataset.act]; if (fn) { if (t.tagName === 'A') e.preventDefault(); fn(t.dataset.arg, t, e); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); if (e.target.matches('.otp input') && e.key === 'Backspace' && !e.target.value) e.target.previousElementSibling?.focus(); });
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.matches('.otp input')) { t.value = t.value.replace(/\D/g, ''); if (t.value) t.nextElementSibling?.focus(); return; }
+  if (t.dataset.input === 'letter') { S.letter[t.dataset.k] = t.value; const id = t.id, pos = t.selectionStart; render(); const n = document.getElementById(id); n.focus(); try { n.setSelectionRange(pos, pos); } catch { } }
+  if (t.dataset.input === 'rq') { S.params.q = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('rq'); n.focus(); n.setSelectionRange(pos, pos); }
+});
+document.addEventListener('change', e => {
+  const t = e.target, c = t.dataset.change;
+  if (!c) { if (t.id === 'jump') { const v = t.value; t.value = ''; jump(v); } return; }
+  if (c === 'wz') { S.wz[t.dataset.k] = t.value; S.wz.err = ''; if (t.dataset.k === 'date' && S.wz.ret && S.wz.ret < t.value) S.wz.ret = ''; render(); }
+  if (c === 'wzBool') { S.wz[t.dataset.k] = t.checked; }
+  if (c === 'wzPet') { const ids = S.wz.petIds; if (t.checked) ids.push(t.value); else S.wz.petIds = ids.filter(x => x !== t.value); }
+  if (c === 'train') { S.rail.train = t.value; S.rail.board = null; render(); }
+  if (c === 'board') { S.rail.board = t.value; render(); }
+  if (c === 'planDate') { if (t.value && D(t.value) >= TODAY) { S.trip.date = t.value; render(); toast('Dates recalculated'); } }
+  if (c === 'flightCar') { S.flight.carrier = t.value; render(); }
+  if (c === 'flTime') { S.flight.time = t.value || '10:00'; render(); }
+  if (c === 'bookRef') { S.flight.ref = t.value; if (t.value) toast('Pet booking reference saved'); }
+  if (c === 'intl') { S.intl[t.dataset.k] = t.value; render(); }
+  if (c === 'intlChip') { S.intl.chip = t.checked; render(); }
+  if (c === 'impVacc') { S.imp.vacc = t.value; render(); }
+  if (c === 'cl') { S.checklist[t.dataset.k] = t.checked; }
+  if (c === 'letterSel') { S.letter[t.dataset.k] = t.value; render(); }
+  if (c === 'petBreed') { S.params.breed = t.value.replace(' (flat-faced)', ''); keepForm(render); }
+});
+document.addEventListener('submit', e => {
+  e.preventDefault(); const f = e.target.dataset.form;
+  if (f === 'search') { const q = document.getElementById('homeSearch').value; tab('rules'); S.params.q = q; render(); }
+  if (f === 'rulesSearch') { }
+  if (f === 'pet') {
+    const g = id => document.getElementById(id);
+    const data = { name: g('pName').value.trim(), species: S.params.sp, breed: g('pBreed').value.replace(' (flat-faced)', ''), flat: g('pFlat')?.checked || false, dob: g('pDob').value, w: +g('pW').value, wc: g('pWc').value ? +g('pWc').value : null, chip: g('pChip').value.trim(), carrier: g('pCar').value || null };
+    if (data.wc != null && data.wc < data.w) { toast('Weight with carrier must be at least the pet\'s weight.'); return; }
+    if (S.params.id) { Object.assign(pet(S.params.id), data); toast('Saved'); back(); }
+    else { const id = 'p' + Date.now(); S.pets.push({ id, ...data }); if (S.wz) S.wz.petIds.push(id); toast(`${data.name} added`); back(); }
+  }
+  if (f === 'carrier') {
+    const g = id => +document.getElementById(id).value; const k = S.params.unit === 'cm' ? 1 / 2.54 : 1;
+    const c = { id: 'c' + Date.now(), name: document.getElementById('cName').value.trim(), type: S.params.type || 'soft', l: +(g('cL') * k).toFixed(1), w: +(g('cW') * k).toFixed(1), h: +(g('cH') * k).toFixed(1), kg: document.getElementById('cKg').value ? g('cKg') : null };
+    S.carriers.push(c); S.flight.carrier = c.id; toast('Carrier saved' + (S.params.unit === 'cm' ? ' (stored in inches)' : '')); back();
+  }
+  if (f === 'vacc') { const g = id => document.getElementById(id).value; S.vacc.push({ id: 'v' + Date.now(), pet: S.params.id, type: g('vType'), given: g('vGiven'), until: g('vUntil') || iso(addDays(D(g('vGiven')), 365)), vet: g('vVet') }); toast('Vaccination added'); render(); }
+  if (f === 'doc') { const file = document.getElementById('dFile').files[0]; if (!file) return; if (file.size > 10485760) { toast('That file is over 10 MB. Choose a smaller one.'); return; } S.docs.push({ id: 'd' + Date.now(), pet: S.params.id, type: document.getElementById('dType').value, file: file.name, expires: document.getElementById('dExp').value || null }); toast('Uploaded privately'); render(); }
+});
+function jump(v) {
+  if (!v) return;
+  if (v.startsWith('s-') || v.startsWith('p-')) return runScenario(v);
+  if (v === 'wizard') return A.startWizard();
+  if (['letter', 'rulesheet', 'vet', 'report', 'wrong'].includes(v)) { if (!S.trip) runScenario('p-rail'); else if (v === 'wrong' || v === 'letter') { if (!S.trip.option?.startsWith('rail')) runScenario('p-rail'); } S.stack = [{ view: 'home', params: {} }]; return go(v); }
+  if (['rules', 'pets', 'home', 'trips'].includes(v)) return tab(v);
+  if (v === 'myths') { tab('rules'); return go('myths'); }
+}
+
+render();
+</script>
